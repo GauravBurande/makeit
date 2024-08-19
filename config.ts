@@ -8,8 +8,7 @@ const configs = {
     callbackUrl: "/studio",
   },
   colors: {
-    // todo: change this
-    main: "#ff5a5f",
+    main: "#E39C4E",
   },
 };
 
