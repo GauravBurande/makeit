@@ -10,7 +10,6 @@ export default function AuthenticationPage() {
     <>
       <div className="container relative h-screen flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0">
         <Link href="/" className="absolute right-4 top-4 md:right-8 md:top-8">
-          {/* it was a login button from shadcn ui example */}
           <Button>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -28,35 +27,26 @@ export default function AuthenticationPage() {
           </Button>
         </Link>
         <div className="relative hidden h-full flex-col bg-muted p-10 text-foreground dark:border-r lg:flex">
-          <div className="absolute z-10 inset-0 bg-[url(/rain.svg)] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
+          <div className="absolute z-10 inset-0 bg-[url(/designs/9.png)] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
           <div className="absolute inset-0 bg-background/20" />
           <div className="relative z-20 flex items-center text-lg font-medium">
             <div className="flex lg:flex-1">
               <Link
-                className="flex items-center gap-1 shrink-0"
+                className="flex items-center gap-2 shrink-0"
                 href="/"
                 title={`${configs.appName} hompage`}
               >
                 <Image
                   src={logo}
                   alt={`${configs.appName} logo`}
-                  className="w-7"
+                  className="w-14 rounded-xl"
                   priority={true}
-                  width={32}
-                  height={32}
+                  width={512}
+                  height={512}
                 />
-                <span className="font-bold">{configs.appName}</span>
+                <span className="font-bold text-2xl">{configs.appName}</span>
               </Link>
             </div>
-          </div>
-          <div className="relative z-20 mt-auto">
-            <blockquote className="space-y-2">
-              <p className="text-lg">
-                &ldquo;This got me 3 sales in just a month after I listed my
-                little tool on it.&rdquo;
-              </p>
-              <footer className="text-sm">Dan Henderson</footer>
-            </blockquote>
           </div>
         </div>
         <div className="lg:p-8">
@@ -66,8 +56,8 @@ export default function AuthenticationPage() {
                 Sign In to your account
               </h1>
               <p className="text-sm text-muted-foreground">
-                Sign In with the same google account you&apos;re signed in with
-                google search console
+                Sign in to your account to continue or start with designing
+                interior.
               </p>
             </div>
             <UserAuthForm />
@@ -75,14 +65,14 @@ export default function AuthenticationPage() {
               By clicking continue, you agree to our{" "}
               <Link
                 href="/terms"
-                className="underline underline-offset-4 hover:text-accent"
+                className="underline underline-offset-4 hover:text-primary"
               >
                 Terms of Service
               </Link>{" "}
               and{" "}
               <Link
                 href="/privacy-policy"
-                className="underline underline-offset-4 hover:text-accent"
+                className="underline underline-offset-4 hover:text-primary"
               >
                 Privacy Policy
               </Link>

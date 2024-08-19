@@ -1,50 +1,61 @@
 import React from "react";
-import { Camera, FileImage, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Marquee from "./magicui/marquee";
+import Image from "next/image";
+import { Fade } from "./magicui/fade-in";
+import Link from "next/link";
 
 const Hero = () => {
+  const designs = Array.from({ length: 8 }, (_, index) => ({
+    src: `/designs/${index + 1}.png`,
+  }));
+
   return (
-    <section className="relative overflow-hidden flex flex-col items-center justify-center py-12 px-4">
-      <main className="text-center">
+    <section className="overflow-hidden flex flex-col items-center justify-center py-12 px-4">
+      <main className="text-center mb-12">
         <h1 className="text-4xl md:text-6xl max-w-5xl leading-snug text-foreground/80 font-bold mb-6">
-          Transform Your Space with AI-Powered Design
+          <Fade>Design your rooms and change the way they look</Fade>
         </h1>
-        <p className="text-xl mb-8 max-w-2xl mx-auto">
-          MakeIt.ai revolutionizes interior design. Redesign your current space,
-          fill empty rooms, or enhance your existing interiors - all with the
-          power of AI.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 max-w-4xl mx-auto">
-          <FeatureCard
-            icon={<Camera className="w-8 h-8 mb-4" />}
-            title="Redesign Current Rooms"
-            description="Take a photo of your room and see it transformed with new designs."
-          />
-          <FeatureCard
-            icon={<Home className="w-8 h-8 mb-4" />}
-            title="Design Empty Spaces"
-            description="Capture your new empty room and watch it come to life with perfect interiors."
-          />
-          <FeatureCard
-            icon={<FileImage className="w-8 h-8 mb-4" />}
-            title="Enhance Interiors"
-            description="Upscale and improve your existing interior images for a polished look."
-          />
-        </div>
+        <Fade
+          framerProps={{
+            show: { transition: { delay: 0.4 } },
+          }}
+        >
+          <p className="text-xl text-accent max-w-2xl mx-auto">
+            Use MakeIt.ai to fill up your empty rooms with the perfect design or
+            change the way your rooms look, it&apos;s simple and easy!
+          </p>
+        </Fade>
+      </main>
+
+      <div className="relative w-full mb-12">
+        <Marquee pauseOnHover className="[--duration:30s]">
+          {designs.map((design, index) => (
+            <div key={index} className="flex w-full h-full justify-center px-1">
+              <div className="relative group">
+                <Image
+                  src={design.src}
+                  alt={`design ${index + 1}`}
+                  width={200}
+                  height={80}
+                  className="w-full h-full rounded-lg shadow-md transition-all duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 rounded-lg border-2 border-transparent transition-all duration-300 group-hover:border-primary/50"></div>
+              </div>
+            </div>
+          ))}
+        </Marquee>
+        <div className="absolute -left-1 lg:left-0 z-40 inset-y-0 w-1/4 bg-gradient-to-r from-background to-transparent h-full pointer-events-none" />
+        <div className="absolute -right-1 lg:right-0 z-40 inset-y-0 w-1/4 bg-gradient-to-l from-background to-transparent h-full pointer-events-none" />
+      </div>
+
+      <Link href={"/signin"}>
         <Button size="lg" className="px-8 py-3 capitalize text-lg">
           design your interior
         </Button>
-      </main>
+      </Link>
     </section>
   );
 };
-
-const FeatureCard = ({ icon, title, description }: any) => (
-  <div className="bg-accent p-6 rounded-lg shadow-md">
-    {icon}
-    <h3 className="text-xl font-semibold mb-2">{title}</h3>
-    <p className="text-sm text-muted-foreground">{description}</p>
-  </div>
-);
 
 export default Hero;
