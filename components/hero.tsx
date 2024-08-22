@@ -6,7 +6,7 @@ import { Fade } from "./magicui/fade-in";
 import Link from "next/link";
 
 const Hero = () => {
-  const designs = Array.from({ length: 8 }, (_, index) => ({
+  const designs = Array.from({ length: 9 }, (_, index) => ({
     src: `/designs/${index + 1}.png`,
   }));
 
