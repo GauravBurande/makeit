@@ -34,11 +34,14 @@ const Hero = () => {
             <div key={index} className="flex w-full h-full justify-center px-1">
               <div className="relative group">
                 <Image
+                  className="w-full h-full rounded-lg shadow-md transition-all duration-300 group-hover:scale-105"
                   src={design.src}
                   alt={`design ${index + 1}`}
                   width={200}
                   height={80}
-                  className="w-full h-full rounded-lg shadow-md transition-all duration-300 group-hover:scale-105"
+                  fill
+                  priority
+                  placeholder="blur"
                 />
                 <div className="absolute inset-0 rounded-lg border-2 border-transparent transition-all duration-300 group-hover:border-primary/50"></div>
               </div>
