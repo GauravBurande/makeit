@@ -39,9 +39,7 @@ const Hero = () => {
                   alt={`design ${index + 1}`}
                   width={200}
                   height={80}
-                  fill
                   priority
-                  placeholder="blur"
                 />
                 <div className="absolute inset-0 rounded-lg border-2 border-transparent transition-all duration-300 group-hover:border-primary/50"></div>
               </div>
