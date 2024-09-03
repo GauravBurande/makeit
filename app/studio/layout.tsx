@@ -1,8 +1,6 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
-// @ts-ignore
-import { authOptions } from "@/libs/next-auth";
-// @ts-ignore
+import { authOptions } from "@/lib/next-auth";
 import configs from "@/config";
 import NavBar from "@/components/NavBar";
 
@@ -16,6 +14,7 @@ export default async function LayoutPrivate({
 }: {
   children: React.ReactNode;
 }) {
+  // @ts-ignore
   const session = await getServerSession(authOptions);
 
   if (!session) {
