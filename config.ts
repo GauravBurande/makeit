@@ -7,6 +7,22 @@ const configs = {
     signinUrl: `/signin`,
     callbackUrl: "/studio",
   },
+  crisp: {
+    id: "",
+    onlyShowOnRoutes: ["/"],
+  },
+  r2: {
+    bucket: "bucket-name",
+    bucketUrl: `https://bucket-name.s3.amazonaws.com/`,
+    cdn: "https://cdn-id.cloudfront.net/",
+  },
+  mailgun: {
+    subdomain: "mg",
+    fromNoReply: `MakeIt <noreply@mg.makeit.ai>`,
+    fromAdmin: `Vincent at MakeIt <marc@mg.makeit.ai>`,
+    supportEmail: "vincent@mg.makeit.ai",
+    forwardRepliesTo: "openuniverse.ai@gmail.com",
+  },
   colors: {
     main: "#E39C4E",
   },
