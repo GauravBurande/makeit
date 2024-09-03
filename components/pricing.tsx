@@ -20,6 +20,7 @@ const pricingPlans = [
       "Discover your inner designer and create your dream home with our cost-effective, user-friendly software.",
     features: [
       "250 images per month",
+      "1GB cloud storage for images",
       "AI Prompt suggestions",
       "Personal-use only",
       "Small watermark",
@@ -32,6 +33,7 @@ const pricingPlans = [
       "Brainstorm ideas quickly, impress clients with stunning visuals, and close deals faster using our professional tools.",
     features: [
       "1,000 images per month",
+      "5GB cloud storage for images",
       "AI Prompt suggestions",
       "Commercial license",
       "No watermark",
@@ -45,6 +47,7 @@ const pricingPlans = [
       "Empower your firm with cutting-edge AI technology to enhance efficiency and stay competitive in the market.",
     features: [
       "5,000 images per month",
+      "25GB cloud storage for images",
       "AI Prompt suggestions",
       "Commercial license",
       "No watermark",

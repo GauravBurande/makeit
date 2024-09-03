@@ -9,9 +9,11 @@ interface IUser extends Document {
   customerId: string;
   priceId: string;
   hasAccess: boolean;
+  plan: string; // New field for plan (e.g., Personal, Pro, Team)
+  imageLimit: number;
+  storageLimit: string;
 }
 
-// USER SCHEMA
 const userSchema = new Schema<IUser>(
   {
     name: {
@@ -43,7 +45,17 @@ const userSchema = new Schema<IUser>(
     },
     hasAccess: {
       type: Boolean,
-      default: false,
+    },
+    plan: {
+      type: String,
+      enum: ["Personal", "Pro", "Team"], // Enum to ensure valid plan types
+      required: true,
+    },
+    imageLimit: {
+      type: Number,
+    },
+    storageLimit: {
+      type: String,
     },
   },
   {
@@ -55,7 +67,6 @@ const userSchema = new Schema<IUser>(
 // Add plugin that converts Mongoose to JSON
 userSchema.plugin(toJSON);
 
-// Export the model or an existing model if already declared
 const User: Model<IUser> =
   mongoose.models.User || mongoose.model<IUser>("User", userSchema);
 
