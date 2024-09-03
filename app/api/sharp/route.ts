@@ -6,8 +6,8 @@ export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
 export async function GET(request: Request) {
-  // todo: compress image only if the size is more than 512kb
   try {
+    // todo: compress image only if the size is more than 512kb
     // Path to the image in the public folder
     const imagePath = path.join(process.cwd(), "public/designs", "10.png");
     console.log("Image path:", imagePath);
