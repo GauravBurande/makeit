@@ -12,6 +12,8 @@ interface IUser extends Document {
   plan: string; // New field for plan (e.g., Personal, Pro, Team)
   imageLimit: number;
   storageLimit: string;
+  subscription: mongoose.Schema.Types.ObjectId;
+  interiorImages: mongoose.Schema.Types.ObjectId[];
 }
 
 const userSchema = new Schema<IUser>(
@@ -57,6 +59,17 @@ const userSchema = new Schema<IUser>(
     storageLimit: {
       type: String,
     },
+    subscription: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Subscription",
+      required: false,
+    },
+    interiorImages: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "InteriorImage",
+      },
+    ],
   },
   {
     timestamps: true,

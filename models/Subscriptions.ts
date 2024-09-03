@@ -1,17 +1,16 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 import toJSON from "./plugins/toJSON";
 
-// Define the Subscription interface extending the Mongoose Document
 interface ISubscription extends Document {
-  userId: mongoose.Schema.Types.ObjectId; // Reference to the User model
-  stripeSubscriptionId: string; // Stripe subscription ID
-  customerId: string; // Stripe customer ID
-  plan: string; // Plan type (e.g., Personal, Pro, Team)
-  priceId: string; // Stripe price ID
-  status: string; // Subscription status (e.g., active, canceled)
-  currentPeriodStart: Date; // Start of the current billing period
-  currentPeriodEnd: Date; // End of the current billing period
-  cancelAtPeriodEnd: boolean; // Indicates if the subscription will cancel at the end of the period
+  userId: mongoose.Schema.Types.ObjectId;
+  stripeSubscriptionId: string;
+  customerId: string;
+  plan: string;
+  priceId: string;
+  status: string;
+  currentPeriodStart: Date;
+  currentPeriodEnd: Date;
+  cancelAtPeriodEnd: boolean;
 }
 
 const subscriptionSchema = new Schema<ISubscription>(
