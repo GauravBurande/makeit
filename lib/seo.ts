@@ -1,4 +1,5 @@
 import configs from "@/config";
+import { env } from "@/env";
 
 interface SEOTagsProps {
   title?: string;
@@ -27,7 +28,7 @@ export const getSEOTags = ({
     keywords: keywords || [configs.appName],
     applicationName: configs.appName,
     metadataBase: new URL(
-      process.env.NODE_ENV === "development"
+      env.NODE_ENV === "development"
         ? "http://localhost:3000/"
         : `https://${configs.domain}/`
     ),

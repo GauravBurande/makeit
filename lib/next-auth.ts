@@ -3,16 +3,17 @@ import GoogleProvider from "next-auth/providers/google";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import configs from "@/config";
 import connectMongo from "./mongo";
+import { env } from "@/env";
 
 export const authOptions = {
   pages: {
     signIn: configs.auth.signinUrl, // Custom sign-in page URL
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: env.NEXTAUTH_SECRET,
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_ID || "",
-      clientSecret: process.env.GOOGLE_SECRET || "",
+      clientId: env.GOOGLE_ID || "",
+      clientSecret: env.GOOGLE_SECRET || "",
       async profile(profile) {
         return {
           id: profile.sub,
@@ -27,6 +28,7 @@ export const authOptions = {
   ...(connectMongo && { adapter: MongoDBAdapter(connectMongo) }),
 
   callbacks: {
+    // @ts-ignore
     session: async ({ session, token }) => {
       if (session?.user) {
         session.user.id = token.sub;
