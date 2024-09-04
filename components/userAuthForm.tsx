@@ -33,8 +33,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   };
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
-    console.log("email: ");
-    console.log(email);
     e.preventDefault();
     setIsLoading(true);
     await signIn("email", { callbackUrl, email });
@@ -42,7 +40,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.value);
     setEmail(e.target.value);
   };
 
