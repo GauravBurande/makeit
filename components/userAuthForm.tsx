@@ -32,10 +32,18 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     setIsLoading(false);
   };
 
-  const handleEmailSignIn = async () => {
+  const handleEmailSignIn = async (e: React.FormEvent) => {
+    console.log("email: ");
+    console.log(email);
+    e.preventDefault();
     setIsLoading(true);
     await signIn("email", { callbackUrl, email });
     setIsLoading(false);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(e.target.value);
+    setEmail(e.target.value);
   };
 
   return (
@@ -49,6 +57,8 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             <Input
               id="email"
               placeholder="name@example.com"
+              onChange={handleChange}
+              value={email}
               type="email"
               autoCapitalize="none"
               autoComplete="email"

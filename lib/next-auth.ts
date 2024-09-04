@@ -1,19 +1,22 @@
 import GoogleProvider from "next-auth/providers/google";
-// import EmailProvider from "next-auth/providers/email";
+import EmailProvider from "next-auth/providers/email";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import configs from "@/config";
+// todo: fix this
+// @ts-ignore
 import connectMongo from "./mongo";
 import { env } from "@/env";
+import { SessionStrategy } from "next-auth";
 
 export const authOptions = {
   pages: {
-    signIn: configs.auth.signinUrl, // Custom sign-in page URL
+    signIn: configs.auth.signinUrl,
   },
   secret: env.NEXTAUTH_SECRET,
   providers: [
     GoogleProvider({
-      clientId: env.GOOGLE_ID || "",
-      clientSecret: env.GOOGLE_SECRET || "",
+      clientId: env.GOOGLE_ID,
+      clientSecret: env.GOOGLE_SECRET,
       async profile(profile) {
         return {
           id: profile.sub,
@@ -24,12 +27,16 @@ export const authOptions = {
         };
       },
     }),
+    EmailProvider({
+      server: env.EMAIL_SERVER,
+      from: configs.mailgun.fromNoReply,
+    }),
   ],
-  ...(connectMongo && { adapter: MongoDBAdapter(connectMongo) }),
-
+  // todo: fix this
+  // @ts-ignore
+  adapter: MongoDBAdapter(connectMongo),
   callbacks: {
-    // @ts-ignore
-    session: async ({ session, token }) => {
+    session: async ({ session, token }: { session: any; token: any }) => {
       if (session?.user) {
         session.user.id = token.sub;
       }
@@ -37,9 +44,10 @@ export const authOptions = {
     },
   },
   session: {
-    strategy: "jwt",
+    strategy: "jwt" as SessionStrategy,
   },
   theme: {
+    colorScheme: "light",
     brandColor: configs.colors.main,
     logo: `https://${configs.domain}/icon.png`,
   },

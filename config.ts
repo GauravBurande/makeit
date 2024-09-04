@@ -19,7 +19,7 @@ const configs = {
   mailgun: {
     subdomain: "mg",
     fromNoReply: `MakeIt <noreply@mg.makeit.ai>`,
-    fromAdmin: `Vincent at MakeIt <marc@mg.makeit.ai>`,
+    fromAdmin: `Vincent at MakeIt <vincent@mg.makeit.ai>`,
     supportEmail: "vincent@mg.makeit.ai",
     forwardRepliesTo: "openuniverse.ai@gmail.com",
   },

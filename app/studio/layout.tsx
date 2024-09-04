@@ -9,6 +9,7 @@ export default async function LayoutPrivate({
 }: {
   children: React.ReactNode;
 }) {
+  // todo: fix this
   // @ts-ignore
   const session = await getServerSession(authOptions);
 

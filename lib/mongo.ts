@@ -1,4 +1,5 @@
 import { env } from "@/env";
+// @ts-ignore
 import { MongoClient } from "mongodb";
 
 declare global {
