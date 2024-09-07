@@ -3,6 +3,7 @@ import { Manrope } from "next/font/google";
 import "./globals.css";
 import { getSEOTags } from "@/lib/seo";
 import configs from "@/config";
+import ClientLayout from "@/components/layout-client";
 
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope" });
 
@@ -33,7 +34,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={manrope.className}>{children}</body>
+      <body className={manrope.className}>
+        <ClientLayout>{children}</ClientLayout>
+      </body>
     </html>
   );
 }

@@ -2,8 +2,6 @@ import GoogleProvider from "next-auth/providers/google";
 import EmailProvider from "next-auth/providers/email";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import configs from "@/config";
-// todo: fix this
-// @ts-ignore
 import connectMongo from "./mongo";
 import { env } from "@/env";
 import { SessionStrategy } from "next-auth";
@@ -32,8 +30,6 @@ export const authOptions = {
       from: configs.mailgun.fromNoReply,
     }),
   ],
-  // todo: fix this
-  // @ts-ignore
   adapter: MongoDBAdapter(connectMongo),
   callbacks: {
     session: async ({ session, token }: { session: any; token: any }) => {

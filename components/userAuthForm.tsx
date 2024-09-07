@@ -1,13 +1,14 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signIn } from "next-auth/react";
 import configs from "@/config";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { IconGoogle, IconSpinner } from "./icons";
 
 type UserAuthFormProps = React.HTMLAttributes<HTMLDivElement>;
 
@@ -15,16 +16,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
 
-  // async function onSubmit(event: any) {
-  //   event.preventDefault();
-  //   setIsLoading(true);
-
-  //   setTimeout(() => {
-  //     setIsLoading(false);
-  //   }, 3000);
-  // }
-
-  const callbackUrl = configs.auth.callbackUrl;
+  const searchParams = useSearchParams();
+  const goToUrl = searchParams.get("url");
+  const callbackUrl = goToUrl || configs.auth.callbackUrl;
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
@@ -64,9 +58,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             />
           </div>
           <Button disabled={isLoading}>
-            {isLoading && (
-              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-            )}
+            {isLoading && <IconSpinner className="mr-2 h-4 w-4 animate-spin" />}
             Sign In with Email
           </Button>
         </div>
@@ -88,9 +80,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         disabled={isLoading}
       >
         {isLoading ? (
-          <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+          <IconSpinner className="mr-2 h-4 w-4 animate-spin" />
         ) : (
-          <Icons.google className="mr-2 h-4 w-4" />
+          <IconGoogle className="mr-2 h-4 w-4" />
         )}{" "}
         Google
       </Button>

@@ -41,7 +41,7 @@ const pricingPlans = [
     popular: true,
   },
   {
-    name: "Team",
+    name: "Premium",
     price: 299,
     description:
       "Empower your firm with cutting-edge AI technology to enhance efficiency and stay competitive in the market.",

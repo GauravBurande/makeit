@@ -9,9 +9,11 @@ interface IUser extends Document {
   customerId: string;
   priceId: string;
   hasAccess: boolean;
-  plan: string; // New field for plan (e.g., Personal, Pro, Team)
+  plan: string; // New field for plan (e.g., Personal, Pro, Premium)
   imageLimit: number;
-  storageLimit: string;
+  usedImages: number;
+  storageLimit: number;
+  storageUsed: number;
   subscription: mongoose.Schema.Types.ObjectId;
   interiorImages: mongoose.Schema.Types.ObjectId[];
 }
@@ -50,14 +52,20 @@ const userSchema = new Schema<IUser>(
     },
     plan: {
       type: String,
-      enum: ["Personal", "Pro", "Team"], // Enum to ensure valid plan types
+      enum: ["Personal", "Pro", "Premium"], // Enum to ensure valid plan types
       required: true,
     },
     imageLimit: {
       type: Number,
     },
+    usedImages: {
+      type: Number,
+    },
     storageLimit: {
-      type: String,
+      type: Number,
+    },
+    storageUsed: {
+      type: Number,
     },
     subscription: {
       type: mongoose.Schema.Types.ObjectId,

@@ -39,7 +39,7 @@ const subscriptionSchema = new Schema<ISubscription>(
     },
     plan: {
       type: String,
-      enum: ["Personal", "Pro", "Team"],
+      enum: ["Personal", "Pro", "Premium"],
       required: true,
     },
     priceId: {
