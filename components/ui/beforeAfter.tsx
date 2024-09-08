@@ -75,7 +75,7 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
     >
       <Image
         src={afterImage}
-        alt="Before"
+        alt="After"
         width={512}
         height={512}
         className="absolute top-0 left-0 w-full h-full rounded-xl object-cover pointer-events-none"
@@ -86,7 +86,7 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
       >
         <Image
           src={beforeImage}
-          alt="After"
+          alt="Before"
           width={512}
           height={512}
           className="w-full h-full rounded-xl object-cover pointer-events-none"
@@ -113,6 +113,16 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
           </svg>
         </div>
       </div>
+      {sliderPosition > 10 && (
+        <div className="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded">
+          Before
+        </div>
+      )}
+      {sliderPosition < 90 && (
+        <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded">
+          After
+        </div>
+      )}
     </div>
   );
 };

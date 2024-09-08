@@ -17,7 +17,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [email, setEmail] = useState("");
 
   const searchParams = useSearchParams();
-  const goToUrl = searchParams.get("url");
+  const goToUrl = decodeURIComponent(searchParams.get("url") || "/");
   const callbackUrl = goToUrl || configs.auth.callbackUrl;
 
   const handleGoogleSignIn = async () => {
@@ -38,7 +38,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   };
 
   return (
-    <div className={cn("grid gap-6", className)} {...props}>
+    <section className={cn("grid gap-6", className)} {...props}>
       <form onSubmit={handleEmailSignIn}>
         <div className="grid gap-2">
           <div className="grid gap-1">
@@ -86,6 +86,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         )}{" "}
         Google
       </Button>
-    </div>
+    </section>
   );
 }

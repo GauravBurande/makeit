@@ -2,14 +2,15 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/next-auth";
 import configs from "@/config";
-import NavBar from "@/components/NavBar";
+import { StudioTopBar } from "@/components/studio/studioTopBar";
+import { getUser } from "@/lib/server-db-calls";
 
 export default async function LayoutPrivate({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // todo: fix this
+  // todo: fix this by extending the authOptions types with session and profile types extended
   // @ts-ignore
   const session = await getServerSession(authOptions);
 
@@ -17,13 +18,15 @@ export default async function LayoutPrivate({
     redirect(configs.auth.signinUrl);
   }
 
+  const user = await getUser();
+  if (!user) {
+    redirect(configs.auth.signinUrl);
+  }
+
   return (
     <div className="flex flex-1 flex-col min-h-screen">
-      <NavBar />
-      <div className="md:flex md:flex-1">
-        {/* <InteriorForm /> */}
-        {children}
-      </div>
+      <StudioTopBar user={user} />
+      <div className="md:flex md:flex-1">{children}</div>
     </div>
   );
 }

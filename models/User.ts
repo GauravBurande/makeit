@@ -52,7 +52,7 @@ const userSchema = new Schema<IUser>(
     },
     plan: {
       type: String,
-      enum: ["Personal", "Pro", "Premium"], // Enum to ensure valid plan types
+      enum: ["Personal", "Pro", "Premium"],
       required: true,
     },
     imageLimit: {
@@ -62,10 +62,10 @@ const userSchema = new Schema<IUser>(
       type: Number,
     },
     storageLimit: {
-      type: Number,
+      type: Number, // in KBs
     },
     storageUsed: {
-      type: Number,
+      type: Number, // in KBs
     },
     subscription: {
       type: mongoose.Schema.Types.ObjectId,

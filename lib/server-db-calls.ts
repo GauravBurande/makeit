@@ -9,18 +9,22 @@ const getUser = async () => {
     const session = await getServerSession(authOptions);
 
     if (!session) {
-      return;
+      return null;
     } else {
       // @ts-ignore
       const { id } = session.user;
       await connectMongo();
 
-      const user = await User.findById(id);
+      const user = await User.findById(id).select("name email image");
 
+      if (!user) {
+        return null;
+      }
       return user;
     }
   } catch (error) {
     console.log(error);
+    return null;
   }
 };
 
