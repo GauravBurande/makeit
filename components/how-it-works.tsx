@@ -42,7 +42,6 @@ const HowItWorks = () => {
             Upload an image of your room and our AI design it the way you want
             that looks good and better!
           </p>
-          {/* todo: add before after images */}
           <BeforeAfterSlider
             beforeImage="/beforeafters/before2.webp"
             afterImage="/beforeafters/after2.png"

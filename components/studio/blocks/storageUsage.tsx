@@ -33,7 +33,7 @@ export function UsagePill({ storageUsed, storageLimit }: UsageProps) {
         <TooltipTrigger>
           <div className="flex items-center gap-4">
             <Progress
-              className="min-w-20 hidden md:block"
+              className="min-w-14 hidden md:block"
               value={usagePercentage}
             />
             <p className="text-muted-foreground">

@@ -33,7 +33,7 @@ export function ImageUsageInfo({ usedImages, imageLimit }: ImageUsageProps) {
         </TooltipTrigger>
         <TooltipContent>
           <p>
-            You have used {usedImages} out of {imageLimit} available images.
+            You have created {usedImages} out of {imageLimit} available images.
           </p>
         </TooltipContent>
       </Tooltip>

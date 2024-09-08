@@ -10,52 +10,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
+import configs from "@/config";
+import { Loader2 } from "lucide-react";
+import { post } from "@/lib/api";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
 
-// todo: change the pricing later with stripe, etc...
-const pricingPlans = [
-  {
-    name: "Personal",
-    price: 29,
-    description:
-      "Discover your inner designer and create your dream home with our cost-effective, user-friendly software.",
-    features: [
-      "250 images per month",
-      "1GB cloud storage for images",
-      "AI Prompt suggestions",
-      "Personal-use only",
-      "Small watermark",
-    ],
-  },
-  {
-    name: "Pro",
-    price: 99,
-    description:
-      "Brainstorm ideas quickly, impress clients with stunning visuals, and close deals faster using our professional tools.",
-    features: [
-      "1,000 images per month",
-      "5GB cloud storage for images",
-      "AI Prompt suggestions",
-      "Commercial license",
-      "No watermark",
-    ],
-    popular: true,
-  },
-  {
-    name: "Premium",
-    price: 299,
-    description:
-      "Empower your firm with cutting-edge AI technology to enhance efficiency and stay competitive in the market.",
-    features: [
-      "5,000 images per month",
-      "25GB cloud storage for images",
-      "AI Prompt suggestions",
-      "Commercial license",
-      "No watermark",
-    ],
-  },
-];
+interface Props {
+  session: any;
+}
 
-const Pricing = () => {
+const Pricing = ({ session }: Props) => {
   const [isYearly, setIsYearly] = useState(true);
 
   return (
@@ -80,7 +45,7 @@ const Pricing = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {pricingPlans.map((plan, index) => (
+          {configs.pricing.map((plan, index) => (
             <Card
               key={index}
               className={`flex overflow-hidden flex-col ${
@@ -118,12 +83,7 @@ const Pricing = () => {
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button
-                  className="w-full"
-                  variant={plan.popular ? "default" : "outline"}
-                >
-                  Upgrade
-                </Button>
+                <ButtonCheckout popular={plan.popular} priceId={plan.priceId} />
               </CardFooter>
             </Card>
           ))}
@@ -133,6 +93,78 @@ const Pricing = () => {
         </div>
       </div>
     </section>
+  );
+};
+
+interface ButtonCheckoutProps {
+  popular: boolean | undefined;
+  priceId: string;
+  mode?: "payment" | "subscription";
+}
+
+export const ButtonCheckout: React.FC<ButtonCheckoutProps> = ({
+  popular = false,
+  priceId,
+  mode = "payment",
+}) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { toast } = useToast();
+
+  const handlePayment = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res: any = await post("/stripe/create-checkout", {
+        priceId,
+        mode,
+        successUrl: configs.stripe.successUrl,
+        cancelUrl: window.location.href,
+      });
+
+      if (res.error) {
+        toast({
+          title: "Error",
+          description: res.error,
+          variant: "destructive",
+        });
+      } else {
+        window.location.href = res.url;
+      }
+    } catch (error) {
+      console.error("Error creating checkout:", error);
+      setError(
+        error instanceof Error ? error.message : "An unexpected error occurred"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <>
+      {error && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      <Button
+        className="w-full"
+        variant={popular ? "default" : "outline"}
+        onClick={handlePayment}
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Processing...
+          </>
+        ) : (
+          "Upgrade"
+        )}
+      </Button>
+    </>
   );
 };
 

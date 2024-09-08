@@ -5,7 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-const Header = () => {
+interface Props {
+  session: any;
+}
+
+const Header = ({ session }: Props) => {
   const navLinks = [
     { name: "How It Works", href: "#how-it-works" },
     { name: "Pricing", href: "#pricing" },
@@ -39,8 +43,10 @@ const Header = () => {
           ))}
         </ul>
       </div>
-      <Link href="/signin">
-        <Button className="text-lg capitalize">get started</Button>
+      <Link href={session ? "/studio" : "/signin"}>
+        <Button className="text-lg capitalize">
+          {session ? "MakeIt studio" : "Get Started"}
+        </Button>
       </Link>
     </nav>
   );

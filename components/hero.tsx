@@ -5,7 +5,11 @@ import Image from "next/image";
 import { Fade } from "./magicui/fade-in";
 import Link from "next/link";
 
-const Hero = () => {
+interface Props {
+  session: any;
+}
+
+const Hero = ({ session }: Props) => {
   const designs = Array.from({ length: 9 }, (_, index) => ({
     src: `/designs/${index + 1}.png`,
   }));
@@ -50,9 +54,9 @@ const Hero = () => {
         <div className="absolute -right-1 lg:right-0 z-40 inset-y-0 w-1/4 bg-gradient-to-l from-background to-transparent h-full pointer-events-none" />
       </div>
 
-      <Link href={"/signin"}>
+      <Link href={session ? "/studio" : "/signin"}>
         <Button size="lg" className="px-8 py-3 capitalize text-lg">
-          design your interior
+          {session ? "MakeIt studio" : "design your interior"}
         </Button>
       </Link>
     </section>
