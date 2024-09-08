@@ -17,8 +17,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [email, setEmail] = useState("");
 
   const searchParams = useSearchParams();
-  const goToUrl = decodeURIComponent(searchParams.get("url") || "/");
-  const callbackUrl = goToUrl || configs.auth.callbackUrl;
+  const callbackUrl = decodeURIComponent(
+    searchParams.get("callbackurl") || configs.auth.callbackUrl
+  );
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);

@@ -153,9 +153,10 @@ export const ButtonCheckout: React.FC<ButtonCheckoutProps> = ({
     } else {
       toast({
         title: "You must be logged in to upgrade",
-        variant: "destructive",
       });
-      router.push("/signin");
+      router.push(
+        `/signin?callbackurl=${encodeURIComponent("/studio#upgrade")}`
+      );
     }
   };
 
