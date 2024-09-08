@@ -15,6 +15,7 @@ import { Loader2 } from "lucide-react";
 import { post } from "@/lib/api";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 interface Props {
   session: any;
@@ -83,7 +84,11 @@ const Pricing = ({ session }: Props) => {
                 </ul>
               </CardContent>
               <CardFooter>
-                <ButtonCheckout popular={plan.popular} priceId={plan.priceId} />
+                <ButtonCheckout
+                  session={session}
+                  popular={plan.popular}
+                  priceId={isYearly ? plan.yearlyPriceId : plan.priceId}
+                />
               </CardFooter>
             </Card>
           ))}
@@ -97,12 +102,14 @@ const Pricing = ({ session }: Props) => {
 };
 
 interface ButtonCheckoutProps {
+  session: any;
   popular: boolean | undefined;
   priceId: string;
   mode?: "payment" | "subscription";
 }
 
 export const ButtonCheckout: React.FC<ButtonCheckoutProps> = ({
+  session,
   popular = false,
   priceId,
   mode = "payment",
@@ -111,44 +118,49 @@ export const ButtonCheckout: React.FC<ButtonCheckoutProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   const { toast } = useToast();
-
+  const router = useRouter();
   const handlePayment = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const res: any = await post("/stripe/create-checkout", {
-        priceId,
-        mode,
-        successUrl: configs.stripe.successUrl,
-        cancelUrl: window.location.href,
-      });
-
-      if (res.error) {
-        toast({
-          title: "Error",
-          description: res.error,
-          variant: "destructive",
+    if (session) {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res: any = await post("/stripe/create-checkout", {
+          priceId,
+          mode,
+          successUrl: configs.stripe.successUrl,
+          cancelUrl: window.location.href,
         });
-      } else {
-        window.location.href = res.url;
+
+        if (res.error) {
+          toast({
+            title: "Error",
+            description: res.error,
+            variant: "destructive",
+          });
+        } else {
+          window.location.href = res.url;
+        }
+      } catch (error) {
+        console.error("Error creating checkout:", error);
+        setError(
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred"
+        );
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error creating checkout:", error);
-      setError(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
-    } finally {
-      setIsLoading(false);
+    } else {
+      toast({
+        title: "You must be logged in to upgrade",
+        variant: "destructive",
+      });
+      router.push("/signin");
     }
   };
 
   return (
-    <>
-      {error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+    <div className="w-full">
       <Button
         className="w-full"
         variant={popular ? "default" : "outline"}
@@ -164,7 +176,12 @@ export const ButtonCheckout: React.FC<ButtonCheckoutProps> = ({
           "Upgrade"
         )}
       </Button>
-    </>
+      {error && (
+        <Alert variant="destructive" className="mt-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+    </div>
   );
 };
 
