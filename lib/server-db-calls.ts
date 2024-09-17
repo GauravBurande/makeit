@@ -15,7 +15,7 @@ const getUser = async () => {
       const { id } = session.user;
       await connectMongo();
 
-      const user = await User.findById(id).select("name email image");
+      const user = await User.findById(id);
 
       if (!user) {
         return null;

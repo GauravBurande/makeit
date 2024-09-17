@@ -1,5 +1,7 @@
 ## TODO list:
 
+- IMPORTANT: setup a mongodb for makeit
+- generate image only if user.hasAccess
 - email user's when abandoned cart (does stripe does that itself or will it need it's own cron job?)
 - have transactional and marketing emails flow
 - research and development on ai models for best interior images, testing and setup on runpod.io (later)

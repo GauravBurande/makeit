@@ -2,20 +2,20 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 import toJSON from "./plugins/toJSON";
 
 // Define the User interface extending the Mongoose Document
-interface IUser extends Document {
+export interface IUser extends Document {
   name: string;
   email: string;
   image?: string;
-  customerId: string;
-  priceId: string;
+  customerId?: string;
+  priceId?: string;
   hasAccess: boolean;
-  plan: string; // New field for plan (e.g., Personal, Pro, Premium)
+  plan?: string; // New field for plan (e.g., Personal, Pro, Premium)
   imageLimit: number;
   usedImages: number;
-  storageLimit: number;
-  storageUsed: number;
-  subscription: mongoose.Schema.Types.ObjectId;
-  interiorImages: mongoose.Schema.Types.ObjectId[];
+  storageLimit: number; // in KBs
+  storageUsed: number; // in KBs
+  subscription?: mongoose.Schema.Types.ObjectId;
+  interiorImages?: mongoose.Schema.Types.ObjectId[];
 }
 
 const userSchema = new Schema<IUser>(

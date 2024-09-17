@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 import toJSON from "./plugins/toJSON";
 
-interface ISubscription extends Document {
+export interface ISubscription extends Document {
   userId: mongoose.Schema.Types.ObjectId;
   stripeSubscriptionId: string;
   customerId: string;

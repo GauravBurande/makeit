@@ -6,13 +6,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, Settings } from "lucide-react";
+import { User, LogOut, Settings, Wallet } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { SignOut } from "@/components/signOut";
-import { UserType } from "@/helper/types";
+import { IUser } from "@/models/User";
 
-export async function UserAvatar({ user }: { user: UserType }) {
+export async function UserAvatar({ user }: { user: IUser }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="focus:outline-none">
@@ -36,8 +36,14 @@ export async function UserAvatar({ user }: { user: UserType }) {
         <DropdownMenuSeparator />
         <DropdownMenuItem className="py-2 px-2 rounded-md hover:bg-secondary focus:bg-secondary cursor-pointer">
           <User className="mr-3" size={20} />
-          <Link href="/account" className="flex-grow">
+          <Link href="/settings#account" className="flex-grow">
             Overview
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem className="py-2 px-2 rounded-md hover:bg-secondary focus:bg-secondary cursor-pointer">
+          <Wallet className="mr-3" size={20} />
+          <Link href="/settings#billing" className="flex-grow">
+            Billing
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem className="py-2 px-2 rounded-md hover:bg-secondary focus:bg-secondary cursor-pointer">
