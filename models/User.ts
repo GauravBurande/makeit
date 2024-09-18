@@ -9,13 +9,16 @@ export interface IUser extends Document {
   customerId?: string;
   priceId?: string;
   hasAccess: boolean;
-  plan?: string; // New field for plan (e.g., Personal, Pro, Premium)
+  plan?: string;
   imageLimit: number;
   usedImages: number;
   storageLimit: number; // in KBs
   storageUsed: number; // in KBs
   subscription?: mongoose.Schema.Types.ObjectId;
-  interiorImages?: mongoose.Schema.Types.ObjectId[];
+  interiorImages?: {
+    imageId: mongoose.Schema.Types.ObjectId;
+    imageUrl: string;
+  }[];
 }
 
 const userSchema = new Schema<IUser>(
@@ -74,8 +77,15 @@ const userSchema = new Schema<IUser>(
     },
     interiorImages: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "InteriorImage",
+        imageId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "InteriorImage",
+          required: true,
+        },
+        imageUrl: {
+          type: String,
+          required: true,
+        },
       },
     ],
   },

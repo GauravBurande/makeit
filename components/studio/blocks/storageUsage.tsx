@@ -25,7 +25,7 @@ function formatStorage(sizeInKB: number): string {
 }
 
 export function UsagePill({ storageUsed, storageLimit }: UsageProps) {
-  const usagePercentage = (storageUsed / storageLimit) * 100;
+  const usagePercentage = (storageUsed / storageLimit) * 100 || 0;
 
   return (
     <TooltipProvider delayDuration={0}>

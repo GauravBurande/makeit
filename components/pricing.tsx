@@ -19,6 +19,7 @@ import { post } from "@/lib/api";
 import configs from "@/config";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { ScrollArea } from "./ui/scroll-area";
+import FAQ from "./faq";
 
 interface PricingPlan {
   name: string;
@@ -44,11 +45,7 @@ const PricingTable: React.FC<PricingProps> = ({
   const [isYearly, setIsYearly] = useState(true);
 
   return (
-    <div
-      className={`container mx-auto px-4 ${
-        isDialog ? "max-h-[80vh] overflow-y-auto" : ""
-      }`}
-    >
+    <div className={`container mx-auto px-4`}>
       <h2 className="text-4xl font-bold text-center mb-4">
         Simple pricing for everyone
       </h2>
@@ -239,7 +236,7 @@ const PricingDialog: React.FC = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-[75vw] w-full max-h-[90vh]">
-        <ScrollArea>
+        <ScrollArea className="max-h-[80vh]">
           <DialogTitle className="hidden">Pricing Options</DialogTitle>
           <DialogDescription className="hidden">
             Choose the plan that best fits your needs.
@@ -249,6 +246,7 @@ const PricingDialog: React.FC = () => {
             plans={configs.pricing}
             isDialog={true}
           />
+          <FAQ />
         </ScrollArea>
       </DialogContent>
     </Dialog>

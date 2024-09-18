@@ -25,8 +25,8 @@ export default async function Home() {
         <DesignEmptyRooms />
         <UserTypeGrid />
         <Pricing session={session} />
-        <CTA />
         <FAQ />
+        <CTA />
       </main>
       <Footer />
     </>

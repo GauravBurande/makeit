@@ -14,25 +14,30 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { UploadCloud } from "lucide-react";
+import { Trash, UploadCloud } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
+import StylesSelector from "./formItems/styles";
+import RoomTypesSelector from "./formItems/roomTypes";
+import ColorSelector from "./formItems/colors";
+import MaterialsSelector from "./formItems/materials";
+import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "../ui/toast";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5mb
 
 const FormSchema = z.object({
   beforeImage: z
     .string()
-    .refine((val) => val.startsWith("data:image") || val.startsWith("http"), {
-      message: "Please provide a valid image input",
-    }),
+    .refine(
+      (val) =>
+        val.startsWith("data:image") ||
+        val.startsWith("blob") ||
+        val.startsWith("http"),
+      {
+        message: "Please provide a valid image input",
+      }
+    ),
   prompt: z.string().max(3900),
   negativePrompt: z.string().max(3900).optional(),
   style: z.string().optional(),
@@ -62,7 +67,6 @@ export function InteriorDesignForm() {
   const LOCALSTORAGE_FORM_KEY = "interiorDesignFormData";
 
   useEffect(() => {
-    console.log("form data getting loaded");
     // Load form data from localStorage when component mounts
     const storedData = localStorage.getItem(LOCALSTORAGE_FORM_KEY);
     if (storedData) {
@@ -77,14 +81,27 @@ export function InteriorDesignForm() {
   }, [form]);
 
   useEffect(() => {
-    console.log("saving form data");
     const subscription = form.watch((value) => {
       localStorage.setItem(LOCALSTORAGE_FORM_KEY, JSON.stringify(value));
     });
     return () => subscription.unsubscribe();
   }, [form.watch, form]);
 
+  const { toast } = useToast();
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
+    // todo: do this only if !user.hasAccess
+    toast({
+      title: "Uh oh! Have you upgraded?",
+      variant: "destructive",
+      description: "It seems like you haven't upgraded yet!",
+      action: (
+        <a href="/studio#upgrade">
+          <ToastAction className="border-none" altText="Upgrade">
+            <Button variant="default">Upgrade</Button>
+          </ToastAction>
+        </a>
+      ),
+    });
     console.log(data);
     localStorage.removeItem(LOCALSTORAGE_FORM_KEY);
   };
@@ -136,6 +153,11 @@ export function InteriorDesignForm() {
     }
   };
 
+  const clearInput = () => {
+    form.setValue("beforeImage", "");
+    setPreview("");
+  };
+
   return (
     <div className="flex flex-col h-full min-w-[24rem] md:h-[calc(100vh-80px)] md:max-h-[calc(100vh-80px)]">
       <ScrollArea>
@@ -158,29 +180,31 @@ export function InteriorDesignForm() {
                       onDrop={handleDrop}
                       onPaste={handlePaste}
                     >
-                      <Input
-                        type="text"
-                        placeholder="Enter a URL, paste a file, or drag a file over."
-                        className="mb-2"
-                        {...field}
-                        onChange={(e) => {
-                          field.onChange(e);
-                          if (e.target.value.startsWith("http")) {
-                            setPreview(e.target.value);
-                          }
-                        }}
-                      />
+                      <div className="relative">
+                        <Input
+                          type="text"
+                          placeholder="Enter a URL, paste a file, or drag a file over."
+                          className="mb-2"
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            if (e.target.value.startsWith("http")) {
+                              setPreview(e.target.value);
+                            }
+                          }}
+                        />
+                      </div>
                       {!preview ? (
                         <div className="flex items-center justify-center">
                           <label
-                            htmlFor={`file-upload-${"beforeImage"}`}
+                            htmlFor={`file-upload-beforeImage`}
                             className="cursor-pointer text-foreground/60 flex items-center gap-1"
                           >
                             <UploadCloud className="w-5 h-5" />
                             <span>Upload a file</span>
                           </label>
                           <input
-                            id={`file-upload-${"beforeImage"}`}
+                            id={`file-upload-beforeImage`}
                             type="file"
                             accept="image/*"
                             onChange={handleChange}
@@ -188,12 +212,24 @@ export function InteriorDesignForm() {
                           />
                         </div>
                       ) : (
-                        // todo: Image
-                        <img
-                          src={preview}
-                          alt="Preview"
-                          className="mt-4 max-w-full h-auto max-h-64 object-contain"
-                        />
+                        <div className="relative mt-4">
+                          {/* todo: use Image nextjs tag */}
+                          <img
+                            src={preview}
+                            alt="Preview"
+                            className="max-w-full h-auto max-h-64 object-contain"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-0 right-0 m-2"
+                            onClick={clearInput}
+                          >
+                            <Trash className="h-4 w-4" />
+                            <span className="text-xs">clear input</span>
+                          </Button>
+                        </div>
                       )}
                     </div>
                     <FormMessage />
@@ -235,29 +271,10 @@ export function InteriorDesignForm() {
                 control={form.control}
                 name="style"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Style{" "}
-                      <span className="text-xs text-foreground/60">
-                        (Optional)
-                      </span>
-                    </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a style" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="modern">Modern</SelectItem>
-                        <SelectItem value="traditional">Traditional</SelectItem>
-                        <SelectItem value="minimalist">Minimalist</SelectItem>
-                        <SelectItem value="rustic">Rustic</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
+                  <StylesSelector
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                  />
                 )}
               />
 
@@ -265,29 +282,10 @@ export function InteriorDesignForm() {
                 control={form.control}
                 name="roomType"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Room Type{" "}
-                      <span className="text-xs text-foreground/60">
-                        (Optional)
-                      </span>
-                    </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a room type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="livingRoom">Living Room</SelectItem>
-                        <SelectItem value="bedroom">Bedroom</SelectItem>
-                        <SelectItem value="kitchen">Kitchen</SelectItem>
-                        <SelectItem value="bathroom">Bathroom</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
+                  <RoomTypesSelector
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
                 )}
               />
 
@@ -295,20 +293,10 @@ export function InteriorDesignForm() {
                 control={form.control}
                 name="color"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Color Scheme{" "}
-                      <span className="text-xs text-foreground/60">
-                        (Optional)
-                      </span>
-                    </FormLabel>
-                    <Input
-                      type="text"
-                      placeholder="e.g., blue and white"
-                      {...field}
-                    />
-                    <FormMessage />
-                  </FormItem>
+                  <ColorSelector
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
                 )}
               />
 
@@ -316,20 +304,10 @@ export function InteriorDesignForm() {
                 control={form.control}
                 name="material"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Preferred Material{" "}
-                      <span className="text-xs text-foreground/60">
-                        (Optional)
-                      </span>
-                    </FormLabel>
-                    <Input
-                      type="text"
-                      placeholder="e.g., wood, marble"
-                      {...field}
-                    />
-                    <FormMessage />
-                  </FormItem>
+                  <MaterialsSelector
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
                 )}
               />
               <Button type="submit" className="w-full md:hidden">

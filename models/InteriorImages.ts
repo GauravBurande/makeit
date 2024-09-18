@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 import toJSON from "./plugins/toJSON";
+import { colors, materials, roomTypes, styles } from "@/helpers/constants";
 
 export interface IInteriorImage extends Document {
   userId: mongoose.Schema.Types.ObjectId; // Reference to the User model
@@ -47,40 +48,19 @@ const interiorImageSchema = new Schema<IInteriorImage>(
     },
     style: {
       type: String,
-      // todo: app more types in this and move this array constants in a single file to to used from
-      enum: [
-        "Modern",
-        "Rustic",
-        "Minimalist",
-        "Traditional",
-        "Industrial",
-        "Scandinavian",
-        "Bohemian",
-      ],
-      required: true,
+      enum: styles,
     },
     roomType: {
       type: String,
-      // todo: app more types in this and move this array constants in a single file to to used from
-      enum: [
-        "Bedroom",
-        "Kitchen",
-        "Hall",
-        "Bathroom",
-        "Dining Room",
-        "Living Room",
-        "Office",
-        "Outdoor",
-      ],
-      required: true,
+      enum: roomTypes,
     },
     color: {
       type: String,
-      required: true,
+      enum: colors,
     },
     material: {
       type: String,
-      required: true,
+      enum: materials,
     },
   },
   {

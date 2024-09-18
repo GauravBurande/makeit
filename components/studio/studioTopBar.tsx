@@ -29,8 +29,14 @@ export async function StudioTopBar({ user }: { user: IUser }) {
 
       <div className="flex items-center space-x-8 lg:space-x-12">
         <div className="hidden md:flex items-center space-x-4 lg:space-x-8">
-          <ImageUsageInfo usedImages={950} imageLimit={1000} />
-          <UsagePill storageUsed={123 * 1024} storageLimit={5 * 1024 * 1024} />
+          <ImageUsageInfo
+            usedImages={user?.usedImages || 0}
+            imageLimit={user?.imageLimit || 0}
+          />
+          <UsagePill
+            storageUsed={user?.storageUsed || 0}
+            storageLimit={user?.storageLimit || 0}
+          />
           {!user.hasAccess && <ButtonUpgrade />}
         </div>
         <div className="flex items-center space-x-4">
