@@ -3,10 +3,9 @@ import Image from "next/image";
 import configs from "@/config";
 import logo from "@/app/icon.png";
 import { UserAvatar } from "./blocks/userAvatar";
-import { UsagePill } from "./blocks/storageUsage";
-import { ImageUsageInfo } from "./blocks/imageUsage";
 import { IUser } from "@/models/User";
 import ButtonUpgrade from "./blocks/buttonUpgrade";
+import { ImageUsageInfo, UsagePill } from "./blocks/usage";
 
 export async function StudioTopBar({ user }: { user: IUser }) {
   return (

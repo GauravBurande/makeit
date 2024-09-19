@@ -18,7 +18,8 @@ export default async function LayoutPrivate({
     redirect(configs.auth.signinUrl);
   }
 
-  const user = await getUser();
+  const res = await getUser();
+  const user = res?.toJSON();
   if (!user) {
     redirect(configs.auth.signinUrl);
   }

@@ -67,7 +67,7 @@ export default function ColorSchemeSelector({
             <ChevronDown className="absolute right-4 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[300px] p-0">
+        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
           <Command>
             <CommandInput
               placeholder="Search color scheme..."

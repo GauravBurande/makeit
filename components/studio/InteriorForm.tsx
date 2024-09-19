@@ -272,7 +272,7 @@ export function InteriorDesignForm() {
                 name="style"
                 render={({ field }) => (
                   <StylesSelector
-                    value={field.value ?? ""}
+                    value={field.value}
                     onChange={field.onChange}
                   />
                 )}

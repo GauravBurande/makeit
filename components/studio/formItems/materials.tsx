@@ -143,7 +143,7 @@ export default function MaterialsSelector({
         </PopoverContent>
       </Popover>
       <FormDescription>
-        Select what material for furniture and other objects you would like to
+        Select which material for furniture and other objects you would like to
         see.
       </FormDescription>
       <FormMessage />
