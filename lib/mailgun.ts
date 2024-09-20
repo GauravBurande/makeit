@@ -31,7 +31,7 @@ if (!env.MAILGUN_API_KEY && process.env.NODE_ENV === "development") {
 interface IMailgunParams {
   to: string;
   subject: string;
-  text: string;
+  text?: string;
   html: string;
   replyTo?: string;
 }

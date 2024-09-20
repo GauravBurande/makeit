@@ -17,7 +17,7 @@ import { Trash2 } from "lucide-react";
 
 export const DangerZone = () => {
   const handleDeleteAccount = () => {
-    // Implement account deletion logic here
+    //todo: Implement account deletion logic here
     console.log("Account deletion initiated");
   };
 

@@ -10,6 +10,7 @@ import {
   Calendar,
   CheckCircle,
   CircleUser,
+  Clock,
   CreditCard,
   HardDrive,
   Image,
@@ -98,8 +99,21 @@ export const BillingSection = async () => {
       currentPeriodStart: undefined,
       currentPeriodEnd: undefined,
       cancelAtPeriodEnd: false,
+      endedAt: undefined,
     };
   }
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "active":
+        return "bg-green-500";
+      case "unpaid":
+        return "bg-red-500";
+      default:
+        return "bg-yellow-500";
+    }
+  };
+
   return (
     <Card id="billing">
       <CardHeader className="flex justify-between items-start">
@@ -138,9 +152,17 @@ export const BillingSection = async () => {
                 {formatDate(billing?.currentPeriodEnd)}
               </span>
             ) : (
-              <span>User hasn't purchasesd any plan yet!</span>
+              <span>User hasn&apos;t purchased any plan yet!</span>
             )}
           </div>
+
+          {billing?.endedAt && (
+            <div className="flex items-center space-x-2 text-muted-foreground">
+              <Clock className="text-primary" />
+              <span className="font-medium">Subscription Ended:</span>
+              <span>{formatDate(billing.endedAt)}</span>
+            </div>
+          )}
         </div>
 
         {billing?.currentPeriodStart && (
@@ -151,6 +173,14 @@ export const BillingSection = async () => {
                 <span>
                   Your subscription will be canceled at the end of the current
                   billing period.
+                </span>
+              </div>
+            ) : billing?.endedAt ? (
+              <div className="bg-red-100 text-red-800 p-4 rounded-md flex items-center space-x-2">
+                <AlertTriangle className="text-red-800" />
+                <span>
+                  Your subscription has ended. Renew to continue using premium
+                  features.
                 </span>
               </div>
             ) : (
@@ -166,8 +196,11 @@ export const BillingSection = async () => {
         )}
       </CardContent>
       <CardFooter>
+        {/* todo: add link to manage subscription */}
         <Button className="w-full">
-          {billing?.cancelAtPeriodEnd
+          {billing?.endedAt
+            ? "Renew Subscription"
+            : billing?.cancelAtPeriodEnd
             ? "Resume Subscription"
             : "Manage Subscription"}
         </Button>

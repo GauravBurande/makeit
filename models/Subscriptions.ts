@@ -11,6 +11,7 @@ export interface ISubscription extends Document {
   currentPeriodStart: Date;
   currentPeriodEnd: Date;
   cancelAtPeriodEnd: boolean;
+  endedAt?: Date;
 }
 
 const subscriptionSchema = new Schema<ISubscription>(
@@ -66,6 +67,9 @@ const subscriptionSchema = new Schema<ISubscription>(
     cancelAtPeriodEnd: {
       type: Boolean,
       default: false,
+    },
+    endedAt: {
+      type: Date,
     },
   },
   {
