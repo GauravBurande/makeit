@@ -37,7 +37,7 @@ export function UserAvatar({ user }: { user: IUser }) {
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-64 p-3 space-y-2">
+      <DropdownMenuContent className="w-64 -translate-x-4 p-3 space-y-2">
         <DropdownMenuLabel className="text-lg font-semibold px-2">
           My Account
         </DropdownMenuLabel>
