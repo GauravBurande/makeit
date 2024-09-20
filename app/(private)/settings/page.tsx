@@ -21,19 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DangerZone } from "@/components/blocks/dangerZone";
 import SignOut from "@/components/signOut";
-
-const settings = {
-  email: "burandegaurav8899@gmail.com",
-  usedImages: 0,
-  imageLimit: 1000,
-  usedStorage: 0,
-  storageLimit: 5 * 1024 * 1024, // 5 GB in KB
-  plan: "Pro",
-  status: "active",
-  currentPeriodStart: new Date("2024-09-01"),
-  currentPeriodEnd: new Date("2024-10-01"),
-  cancelAtPeriodEnd: false,
-};
+import { getBilling, getUser } from "@/lib/db";
 
 export default function Settings() {
   return (
@@ -46,7 +34,11 @@ export default function Settings() {
   );
 }
 
-export const AccountOverview = () => {
+export const AccountOverview = async () => {
+  const user = await getUser();
+  if (!user) {
+    return null;
+  }
   return (
     <Card id="account" className="w-full">
       <CardHeader>
@@ -58,22 +50,22 @@ export const AccountOverview = () => {
       <CardContent className="space-y-6">
         <div className="flex items-center space-x-2 bg-muted p-3 rounded-md">
           <Mail className="h-5 w-5 text-muted-foreground" />
-          <span className="text-sm font-medium">{settings.email}</span>
+          <span className="text-sm font-medium">{user?.email}</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <UsageCard
             icon={<Image className="h-5 w-5 text-muted-foreground" />}
             title="Image Usage"
-            used={settings.usedImages}
-            limit={settings.imageLimit}
+            used={user?.usedImages || 0}
+            limit={user?.imageLimit || 0}
             unit="images"
           />
           <UsageCard
             icon={<HardDrive className="h-5 w-5 text-muted-foreground" />}
             title="Storage Usage"
-            used={settings.usedStorage}
-            limit={settings.storageLimit}
+            used={user?.storageUsed || 0}
+            limit={user?.storageLimit || 0}
             unit="KB"
           />
         </div>
@@ -97,7 +89,17 @@ const getStatusColor = (status: string): string => {
   }
 };
 
-export const BillingSection = () => {
+export const BillingSection = async () => {
+  let billing: any = await getBilling();
+  if (!billing) {
+    billing = {
+      plan: "Free",
+      status: "unpaid",
+      currentPeriodStart: undefined,
+      currentPeriodEnd: undefined,
+      cancelAtPeriodEnd: false,
+    };
+  }
   return (
     <Card id="billing">
       <CardHeader className="flex justify-between items-start">
@@ -109,7 +111,7 @@ export const BillingSection = () => {
           variant="secondary"
           className="bg-primary text-primary-foreground"
         >
-          {settings.plan || "Free"} Plan
+          {billing?.plan} Plan
         </Badge>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -119,10 +121,10 @@ export const BillingSection = () => {
           </span>
           <Badge
             className={`${getStatusColor(
-              settings.status || "unpaid"
+              billing?.status || "unpaid"
             )} text-primary-foreground capitalize`}
           >
-            {settings.status || "unpaid"}
+            {billing?.status}
           </Badge>
         </div>
 
@@ -130,10 +132,10 @@ export const BillingSection = () => {
           <div className="flex items-center space-x-2 text-muted-foreground">
             <Calendar className="text-primary" />
             <span className="font-medium">Current Billing Period:</span>
-            {settings.currentPeriodStart ? (
+            {billing?.currentPeriodStart ? (
               <span>
-                {formatDate(settings.currentPeriodStart)} -{" "}
-                {formatDate(settings.currentPeriodEnd)}
+                {formatDate(billing?.currentPeriodStart)} -{" "}
+                {formatDate(billing?.currentPeriodEnd)}
               </span>
             ) : (
               <span>User hasn't purchasesd any plan yet!</span>
@@ -141,9 +143,9 @@ export const BillingSection = () => {
           </div>
         </div>
 
-        {settings.currentPeriodStart && (
+        {billing?.currentPeriodStart && (
           <div>
-            {settings.cancelAtPeriodEnd ? (
+            {billing?.cancelAtPeriodEnd ? (
               <div className="bg-yellow-100 text-yellow-800 p-4 rounded-md flex items-center space-x-2">
                 <AlertTriangle className="text-yellow-800" />
                 <span>
@@ -165,7 +167,7 @@ export const BillingSection = () => {
       </CardContent>
       <CardFooter>
         <Button className="w-full">
-          {settings.cancelAtPeriodEnd
+          {billing?.cancelAtPeriodEnd
             ? "Resume Subscription"
             : "Manage Subscription"}
         </Button>

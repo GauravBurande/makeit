@@ -31,7 +31,6 @@ const userSchema = new Schema<IUser>(
       type: String,
       trim: true,
       lowercase: true,
-      private: true, // This custom option should be manually filtered by the toJSON plugin
     },
     image: {
       type: String,

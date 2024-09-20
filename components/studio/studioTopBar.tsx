@@ -3,11 +3,14 @@ import Image from "next/image";
 import configs from "@/config";
 import logo from "@/app/icon.png";
 import { UserAvatar } from "./blocks/userAvatar";
-import { IUser } from "@/models/User";
 import ButtonUpgrade from "./blocks/buttonUpgrade";
 import { ImageUsageInfo, UsagePill } from "./blocks/usage";
+import { TUser } from "@/helpers/types";
 
-export async function StudioTopBar({ user }: { user: IUser }) {
+interface studioTopBarProps {
+  user: TUser;
+}
+export async function StudioTopBar({ user }: studioTopBarProps) {
   return (
     <header className="w-full py-4 px-6 md:px-10 flex items-center justify-between bg-background border-b border-b-border">
       <div className="flex items-center space-x-6">
@@ -36,9 +39,9 @@ export async function StudioTopBar({ user }: { user: IUser }) {
             storageUsed={user?.storageUsed || 0}
             storageLimit={user?.storageLimit || 0}
           />
-          {!user.hasAccess && <ButtonUpgrade />}
         </div>
-        <div className="flex items-center space-x-4">
+        {!user.hasAccess && <ButtonUpgrade />}
+        <div className={`${!user.hasAccess ? "hidden sm:flex" : ""}`}>
           <UserAvatar user={user} />
         </div>
       </div>

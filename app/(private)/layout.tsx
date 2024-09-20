@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/next-auth";
 import configs from "@/config";
 import { StudioTopBar } from "@/components/studio/studioTopBar";
-import { getUser } from "@/lib/server-db-calls";
+import { getUser } from "@/lib/db";
 
 export default async function LayoutPrivate({
   children,
@@ -13,14 +13,9 @@ export default async function LayoutPrivate({
   // todo: fix this by extending the authOptions types with session and profile types extended
   // @ts-ignore
   const session = await getServerSession(authOptions);
+  const user = await getUser();
 
-  if (!session) {
-    redirect(configs.auth.signinUrl);
-  }
-
-  const res = await getUser();
-  const user = res?.toJSON();
-  if (!user) {
+  if (!session || !user) {
     redirect(configs.auth.signinUrl);
   }
 

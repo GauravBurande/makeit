@@ -14,7 +14,7 @@ export function SignOut({ fullWidth = false, children = "Sign out" }) {
       <Button
         onClick={handleSignOut}
         variant={"outline"}
-        className={"w-full py-6"}
+        className={"w-full hover:bg-destructive py-6"}
       >
         <LogOut className="h-4 w-4 mr-2" />
         {children}

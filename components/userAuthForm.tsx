@@ -50,7 +50,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   };
 
   const LastUsedTag = () => (
-    <div className="absolute bg-black/20 p-1 rounded-md -left-1 top-1/2 -translate-x-full -translate-y-1/2 pr-2 flex items-center">
+    <div className="absolute bg-black/20 p-1 rounded-md left-24 sm:-left-1 top-1/2 -translate-x-full -translate-y-1/2 pr-2 flex items-center">
       <Key className="h-4 w-4 mr-1" />
       <span className="text-xs">Last used</span>
     </div>

@@ -23,6 +23,8 @@ import ColorSelector from "./formItems/colors";
 import MaterialsSelector from "./formItems/materials";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "../ui/toast";
+import { IUser } from "@/models/User";
+import { TUser } from "@/helpers/types";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5mb
 
@@ -46,7 +48,10 @@ const FormSchema = z.object({
   material: z.string().optional(),
 });
 
-export function InteriorDesignForm() {
+interface interiorFormProps {
+  user: TUser;
+}
+export function InteriorDesignForm({ user }: interiorFormProps) {
   const [dragActive, setDragActive] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
 
@@ -89,21 +94,24 @@ export function InteriorDesignForm() {
 
   const { toast } = useToast();
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    // todo: do this only if !user.hasAccess
-    toast({
-      title: "Uh oh! Have you upgraded?",
-      variant: "destructive",
-      description: "It seems like you haven't upgraded yet!",
-      action: (
-        <a href="/studio#upgrade">
-          <ToastAction className="border-none" altText="Upgrade">
-            <Button variant="default">Upgrade</Button>
-          </ToastAction>
-        </a>
-      ),
-    });
-    console.log(data);
-    localStorage.removeItem(LOCALSTORAGE_FORM_KEY);
+    if (!user.hasAccess) {
+      toast({
+        title: "Uh oh! Have you upgraded?",
+        variant: "destructive",
+        description: "It seems like you haven't upgraded yet!",
+        action: (
+          <a href="/studio#upgrade">
+            <ToastAction className="border-none" altText="Upgrade">
+              <Button variant="default">Upgrade</Button>
+            </ToastAction>
+          </a>
+        ),
+      });
+      return;
+    } else {
+      console.log(data);
+      localStorage.removeItem(LOCALSTORAGE_FORM_KEY);
+    }
   };
 
   const handleDrag = useCallback((e: any) => {

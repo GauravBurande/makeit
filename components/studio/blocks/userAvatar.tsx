@@ -7,7 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, Settings, Wallet } from "lucide-react";
+import { User, LogOut, Settings, Wallet, ArrowUpCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { SignOut } from "@/components/signOut";
@@ -44,7 +44,7 @@ export function UserAvatar({ user }: { user: IUser }) {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={handleSelect}
-          className="py-2 px-2 rounded-md hover:bg-secondary focus:bg-secondary cursor-pointer"
+          className="py-2 px-2 rounded-md cursor-pointer"
         >
           <User className="mr-3" size={20} />
           <Link href="/settings#account" className="flex-grow">
@@ -53,7 +53,7 @@ export function UserAvatar({ user }: { user: IUser }) {
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={handleSelect}
-          className="py-2 px-2 rounded-md hover:bg-secondary focus:bg-secondary cursor-pointer"
+          className="py-2 px-2 rounded-md cursor-pointer"
         >
           <Wallet className="mr-3" size={20} />
           <Link href="/settings#billing" className="flex-grow">
@@ -62,7 +62,7 @@ export function UserAvatar({ user }: { user: IUser }) {
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={handleSelect}
-          className="py-2 px-2 rounded-md hover:bg-secondary focus:bg-secondary cursor-pointer"
+          className="py-2 px-2 rounded-md cursor-pointer"
         >
           <Settings className="mr-3" size={20} />
           <Link href="/settings" className="flex-grow">
@@ -72,7 +72,7 @@ export function UserAvatar({ user }: { user: IUser }) {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={handleSelect}
-          className="py-2 px-2 rounded-md hover:bg-secondary focus:bg-secondary cursor-pointer"
+          className="py-2 px-2 rounded-md hover:bg-destructive focus:bg-destructive cursor-pointer"
         >
           <LogOut className="mr-3" size={20} />
           <SignOut />
