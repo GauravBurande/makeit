@@ -21,7 +21,6 @@ import { formatDate } from "@/helpers/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DangerZone } from "@/components/blocks/dangerZone";
-import SignOut from "@/components/signOut";
 import { getBilling, getUser } from "@/lib/db";
 
 export default function Settings() {
@@ -29,7 +28,6 @@ export default function Settings() {
     <main className="min-h-screen space-y-12 p-10 w-full max-w-3xl mx-auto">
       <AccountOverview />
       <BillingSection />
-      <SignOut fullWidth />
       <DangerZone />
     </main>
   );

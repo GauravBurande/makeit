@@ -14,6 +14,7 @@ import {
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { Button } from "../ui/button";
 import { Trash2 } from "lucide-react";
+import SignOut from "../signOut";
 
 export const DangerZone = () => {
   const handleDeleteAccount = () => {
@@ -31,6 +32,7 @@ export const DangerZone = () => {
           Actions in this area can have irreversible consequences. Please
           proceed with caution. You cannot click buttons accidentally here!
         </p>
+        <SignOut fullWidth />
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="destructive" className="w-full">

@@ -97,7 +97,8 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
       toast({
         title: "Uh oh! Have you upgraded?",
         variant: "destructive",
-        description: "It seems like you haven't upgraded yet!",
+        description:
+          "It seems like you don't have enough image credits or haven't purchased yet!",
         action: (
           <a href="/studio#upgrade">
             <ToastAction className="border-none" altText="Upgrade">
