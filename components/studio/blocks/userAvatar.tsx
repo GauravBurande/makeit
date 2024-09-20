@@ -11,10 +11,10 @@ import { User, LogOut, Settings, Wallet, ArrowUpCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { SignOut } from "@/components/signOut";
-import { IUser } from "@/models/User";
 import { useState } from "react";
+import { TUser } from "@/helpers/types";
 
-export function UserAvatar({ user }: { user: IUser }) {
+export function UserAvatar({ user }: { user: TUser }) {
   const [open, setOpen] = useState(false);
 
   const handleSelect = () => {

@@ -23,7 +23,6 @@ import ColorSelector from "./formItems/colors";
 import MaterialsSelector from "./formItems/materials";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "../ui/toast";
-import { IUser } from "@/models/User";
 import { TUser } from "@/helpers/types";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5mb
@@ -221,12 +220,14 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
                         </div>
                       ) : (
                         <div className="relative mt-4">
-                          {/* todo: use Image nextjs tag */}
-                          <img
-                            src={preview}
-                            alt="Preview"
-                            className="max-w-full h-auto max-h-64 object-contain"
-                          />
+                          {
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={preview}
+                              alt="Preview"
+                              className="max-w-full h-auto max-h-64 object-contain"
+                            />
+                          }
                           <Button
                             type="button"
                             variant="destructive"
