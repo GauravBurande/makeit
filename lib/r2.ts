@@ -61,6 +61,38 @@ export async function uploadFileToBucket(file: File, filename: string) {
   return res;
 }
 
+export async function uploadImageFileAndReturnUrl(
+  file: File,
+  filename: string
+) {
+  const Key = filename;
+  const Bucket = env.CLOUDFLARE_BUCKET_NAME;
+
+  try {
+    const parallelUploads = new Upload({
+      client: s3Client,
+      params: {
+        Bucket,
+        Key,
+        Body: file.stream(),
+        ACL: "public-read",
+        ContentType: file.type,
+      },
+      queueSize: 4,
+      leavePartsOnError: false,
+    });
+
+    await parallelUploads.done();
+
+    // Construct and return the URL
+    // if custom domain: `https://cdn.makeit.ai/${Key}`
+    // todo: the below url might not be the safe way, use the custom domain probalby
+    return `https://${env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com/${Bucket}/${Key}`;
+  } catch (e) {
+    throw e;
+  }
+}
+
 export async function getPresignedPostUrl(
   objectName: string,
   contentType: string

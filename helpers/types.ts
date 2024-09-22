@@ -1,3 +1,8 @@
 import { IUser } from "@/models/User";
 
-export type TUser = Omit<IUser, keyof Document>;
+export interface PlainUser extends Omit<IUser, "interiorImages"> {
+  interiorImages?: Array<{
+    imageId: string;
+    imageUrl: string;
+  }>;
+}

@@ -1,43 +1,43 @@
 import Image from "next/image";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { TUser } from "@/helpers/types";
-
-interface ImageData {
-  src: string;
-}
+import { PlainUser } from "@/helpers/types";
+import { Loader } from "lucide-react";
 
 interface imageGalleryProps {
-  user: TUser;
+  user: PlainUser;
 }
 
 const ImageGallery = ({ user }: imageGalleryProps) => {
-  // const images: ImageData[] = [
-  //   { src: "/designs/1.png" },
-  //   { src: "/designs/2.png" },
-  //   { src: "/designs/3.png" },
-  //   { src: "/designs/4.png" },
-  //   { src: "/designs/5.png" },
-  //   { src: "/designs/6.png" },
-  //   { src: "/designs/7.png" },
-  //   { src: "/designs/8.png" },
-  //   { src: "/designs/9.png" },
-  //   { src: "/designs/10.png" },
-  // ];
+  const images = (user?.interiorImages || []).map(({ imageUrl, imageId }) => ({
+    imageUrl,
+    imageId,
+  }));
 
   return (
     <ScrollArea className="h-full">
-      {user?.interiorImages && user?.interiorImages?.length > 0 ? (
+      {images?.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-          {user?.interiorImages.map((img, index) => (
-            <div key={index} className="relative aspect-video">
-              <Image
-                src={img.imageUrl}
-                alt={`Design ${index + 1}`}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                style={{ objectFit: "cover" }}
-                className="rounded-lg"
-              />
+          {images.map((img, index) => (
+            <div
+              key={index}
+              className="relative aspect-video bg-foreground/10 rounded-lg overflow-hidden"
+            >
+              {img.imageUrl === "" ? (
+                <div className="w-full h-full flex flex-col items-center justify-center text-accent">
+                  <Loader className="w-8 h-8 animate-spin mb-2" />
+                  <p className="text-sm font-medium">Generating image...</p>
+                  <p className="text-xs mt-1">This may take a few minutes</p>
+                </div>
+              ) : (
+                <Image
+                  src={img.imageUrl}
+                  alt={`Design ${index + 1}`}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  style={{ objectFit: "cover" }}
+                  className="rounded-lg"
+                />
+              )}
             </div>
           ))}
         </div>

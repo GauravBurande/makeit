@@ -5,10 +5,10 @@ import logo from "@/app/icon.png";
 import { UserAvatar } from "./blocks/userAvatar";
 import ButtonUpgrade from "./blocks/buttonUpgrade";
 import { ImageUsageInfo, UsagePill } from "./blocks/usage";
-import { TUser } from "@/helpers/types";
+import { PlainUser } from "@/helpers/types";
 
 interface studioTopBarProps {
-  user: TUser;
+  user: PlainUser;
 }
 export async function StudioTopBar({ user }: studioTopBarProps) {
   return (

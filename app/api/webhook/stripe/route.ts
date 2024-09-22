@@ -13,9 +13,9 @@ const stripe = new Stripe(env.STRIPE_SECRET_KEY!, {
 const webhookSecret = env.STRIPE_WEBHOOK_SECRET!;
 
 const planLimits = {
-  Personal: { imageLimit: 250, storageLimit: 512 * 1024 }, // 512MB in KB
-  Pro: { imageLimit: 1000, storageLimit: 1024 * 1024 }, // 1GB in KB
-  Premium: { imageLimit: 5000, storageLimit: 5 * 1024 * 1024 }, // 5GB in KB
+  Personal: { imageLimit: 250, storageLimit: 1 * 1024 * 1024 }, // 1GB in KB
+  Pro: { imageLimit: 1000, storageLimit: 5 * 1024 * 1024 }, // 5GB in KB
+  Premium: { imageLimit: 5000, storageLimit: 25 * 1024 * 1024 }, // 25GB in KB
 };
 
 function getPlanFromPriceId(

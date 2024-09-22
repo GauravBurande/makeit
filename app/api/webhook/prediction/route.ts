@@ -9,3 +9,4 @@
 //     6. get the userId from images model array and then store the imageid and url in the array
 //     7. anything else?
 //     8. firt make sure the request is from replicate secure this webhook endpoint, but how? let's see
+//     9.[IMPORTANT] after done with basic image generation send the image then to the clarity upscaler

@@ -9,7 +9,8 @@ const connectMongo = async (): Promise<typeof mongoose | null> => {
   }
 
   try {
-    return await mongoose.connect(env.MONGODB_URI);
+    const conn = await mongoose.connect(env.MONGODB_URI);
+    return conn;
   } catch (e) {
     console.error("Mongoose Client Error: " + (e as Error).message);
     return null; // Return null in case of an error

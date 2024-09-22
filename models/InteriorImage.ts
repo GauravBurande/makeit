@@ -4,12 +4,13 @@ import { colors, materials, roomTypes, styles } from "@/helpers/constants";
 
 export interface IInteriorImage extends Document {
   userId: mongoose.Schema.Types.ObjectId; // Reference to the User model
+  prediction?: string;
   beforeImage: string; // URL to the before image stored in Cloudflare R2
-  afterImage: string; // URL to the after image stored in Cloudflare R2
+  afterImage?: string; // URL to the after image stored in Cloudflare R2
   prompt: string; // AI-generated prompt used to create the image
   negativePrompt: string; // Negative prompt for AI generation
-  beforeImageSize: string; // Image size of the before image in KBs
-  afterImageSize: string; // Image size of the after image in KBs
+  beforeImageSize: number; // Image size of the before image in KBs
+  afterImageSize?: number; // Image size of the after image in KBs
   style?: string; // Interior design style (e.g., Modern, Rustic, Minimalist)
   roomType?: string; // Room type (e.g., Bedroom, Kitchen, Hall, Bathroom, Dining Room)
   color?: string; // Main color used in the design
@@ -23,13 +24,16 @@ const interiorImageSchema = new Schema<IInteriorImage>(
       ref: "User",
       required: true,
     },
+    prediction: {
+      type: String,
+    },
     beforeImage: {
       type: String,
       required: true,
     },
     afterImage: {
       type: String,
-      required: true,
+      required: false,
     },
     prompt: {
       type: String,
@@ -39,28 +43,24 @@ const interiorImageSchema = new Schema<IInteriorImage>(
       type: String,
     },
     beforeImageSize: {
-      type: String,
+      type: Number,
       required: true,
     },
     afterImageSize: {
-      type: String,
-      required: true,
+      type: Number,
+      required: false,
     },
     style: {
       type: String,
-      enum: styles,
     },
     roomType: {
       type: String,
-      enum: roomTypes,
     },
     color: {
       type: String,
-      enum: colors,
     },
     material: {
       type: String,
-      enum: materials,
     },
   },
   {
@@ -73,7 +73,7 @@ const interiorImageSchema = new Schema<IInteriorImage>(
 interiorImageSchema.plugin(toJSON);
 
 const InteriorImage: Model<IInteriorImage> =
-  mongoose.models.InteriorImage ||
+  (mongoose.models.InteriorImage as Model<IInteriorImage>) ||
   mongoose.model<IInteriorImage>("InteriorImage", interiorImageSchema);
 
 export default InteriorImage;

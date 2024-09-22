@@ -12,9 +12,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { SignOut } from "@/components/signOut";
 import { useState } from "react";
-import { TUser } from "@/helpers/types";
+import { PlainUser } from "@/helpers/types";
 
-export function UserAvatar({ user }: { user: TUser }) {
+export function UserAvatar({ user }: { user: PlainUser }) {
   const [open, setOpen] = useState(false);
 
   const handleSelect = () => {

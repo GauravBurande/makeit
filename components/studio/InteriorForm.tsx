@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Trash, UploadCloud } from "lucide-react";
+import { Loader, Trash, UploadCloud } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
 import StylesSelector from "./formItems/styles";
 import RoomTypesSelector from "./formItems/roomTypes";
@@ -23,9 +23,10 @@ import ColorSelector from "./formItems/colors";
 import MaterialsSelector from "./formItems/materials";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "../ui/toast";
-import { TUser } from "@/helpers/types";
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5mb
+import { PlainUser } from "@/helpers/types";
+import { uploadImageFileAndReturnUrl } from "@/lib/r2";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const FormSchema = z.object({
   beforeImage: z
@@ -39,7 +40,7 @@ const FormSchema = z.object({
         message: "Please provide a valid image input",
       }
     ),
-  prompt: z.string().max(3900),
+  prompt: z.string().min(10).max(3900),
   negativePrompt: z.string().max(3900).optional(),
   style: z.string().optional(),
   roomType: z.string().optional(),
@@ -48,24 +49,27 @@ const FormSchema = z.object({
 });
 
 interface interiorFormProps {
-  user: TUser;
+  user: PlainUser;
 }
 export function InteriorDesignForm({ user }: interiorFormProps) {
   const [dragActive, setDragActive] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const defaultValues = {
+    beforeImage: "",
+    prompt: "",
+    negativePrompt:
+      "lowres, watermark, banner, logo, contactinfo, text, deformed, blurry, blur, out of focus, out of frame, surreal, extra, ugly, upholstered walls, fabric walls, plush walls, mirror, mirrored, functional, realistic, illustration, distorted, horror",
+    style: "",
+    roomType: "",
+    color: "",
+    material: "",
+  };
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
-    defaultValues: {
-      beforeImage: "",
-      prompt: "",
-      negativePrompt:
-        "lowres, watermark, banner, logo, contactinfo, text, deformed, blurry, blur, out of focus, out of frame, surreal, extra, ugly, upholstered walls, fabric walls, plush walls, mirror, mirrored, functional, realistic, illustration, distorted, horror",
-      style: "",
-      roomType: "",
-      color: "",
-      material: "",
-    },
+    defaultValues,
   });
 
   const LOCALSTORAGE_FORM_KEY = "interiorDesignFormData";
@@ -92,13 +96,14 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
   }, [form.watch, form]);
 
   const { toast } = useToast();
-  const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    if (!user.hasAccess) {
+  const router = useRouter();
+  const onSubmit = async (data: z.infer<typeof FormSchema>) => {
+    if (isLoading) return; // Prevent multiple submissions
+    const errorToast = (message: string) => {
       toast({
         title: "Uh oh! Have you upgraded?",
+        description: message,
         variant: "destructive",
-        description:
-          "It seems like you don't have enough image credits or haven't purchased yet!",
         action: (
           <a href="/studio#upgrade">
             <ToastAction className="border-none" altText="Upgrade">
@@ -107,9 +112,83 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
           </a>
         ),
       });
+    };
+    if (!user.hasAccess) {
+      errorToast("It seems like you haven't purchased yet!");
       return;
-    } else {
-      console.log(data);
+    }
+    if (user.usedImages > user.imageLimit) {
+      errorToast(
+        "It seems like you have reached your image limit. Please upgrade your account to add more images."
+      );
+      return;
+    }
+    if (user.storageLimit < user.storageUsed) {
+      errorToast(
+        "It seems like you have reached your storage limit. Please upgrade."
+      );
+      return;
+    }
+
+    setIsLoading(true);
+
+    const {
+      beforeImage,
+      prompt,
+      negativePrompt,
+      style,
+      roomType,
+      color,
+      material,
+    } = data;
+
+    try {
+      const response = await fetch("/api/prediction", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache",
+        },
+        cache: "no-store",
+        next: {
+          revalidate: 0,
+        },
+        body: JSON.stringify({
+          userId: user._id,
+          image: beforeImage,
+          prompt,
+          negativePrompt,
+          style,
+          roomType,
+          color,
+          material,
+        }),
+      });
+      const predictionData = await response.json();
+      console.log(predictionData);
+      if (response.status !== 201) {
+        toast({
+          variant: "destructive",
+          title: response.statusText,
+          description: predictionData.message,
+        });
+        return;
+      }
+      form.reset({
+        ...defaultValues,
+        beforeImage: form.getValues("beforeImage"),
+        prompt: form.getValues("prompt"),
+      });
+      router.refresh();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: error.name,
+        description: error.message,
+      });
+      return;
+    } finally {
+      setIsLoading(false);
       localStorage.removeItem(LOCALSTORAGE_FORM_KEY);
     }
   };
@@ -141,13 +220,62 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
     }
   };
 
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10mb
+
+  // todo: use this function when got r2 setup done
+  // const handleFile = async (file: File) => {
+  //   if (file.size > MAX_FILE_SIZE) {
+  //     console.error("File is too large. Maximum size is 10MB.");
+  //     return;
+  //   }
+
+  //   try {
+  //     // Generate a unique filename
+  //     const filename = `${Date.now()}-${file.name}`;
+
+  //     // Upload the file to R2 and get the URL directly
+  //     const fileUrl = await uploadImageFileAndReturnUrl(file, filename);
+  //     if(!fileUrl) {
+  //       toast({
+  //         variant: "destructive",
+  //         title: "Something went wrong!",
+  //         description: "Failed to upload image, try again!",
+  //       })
+  //       return;
+  //     }
+  //     setPreview(fileUrl);
+  //     form.setValue("beforeImage", fileUrl);
+  //   } catch (error) {
+  //     console.error("Error uploading file:", error);
+  //   }
+  // };
+
   const handleFile = (file: File) => {
-    // todo: Here upload the file to r2 cloud storage
-    // For this we'll just create a local object URL
-    const objectUrl = URL.createObjectURL(file);
-    setPreview(objectUrl);
-    // todo: fix this later, objectUrl not the correct value maybe
-    form.setValue("beforeImage", objectUrl);
+    if (file.size > MAX_FILE_SIZE) {
+      console.error("File is too large. Maximum size is 10MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      if (event.target && event.target.result) {
+        const dataUrl = event.target.result as string;
+
+        const objectUrl = URL.createObjectURL(file);
+        setPreview(objectUrl);
+
+        // Set the form value with the data URL
+        form.setValue("beforeImage", dataUrl);
+      }
+    };
+
+    reader.onerror = (error) => {
+      console.error("Error reading file:", error);
+    };
+
+    // Read the file as a data URL (base64)
+    reader.readAsDataURL(file);
   };
 
   const handlePaste = (e: any) => {
@@ -161,7 +289,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
     }
   };
 
-  const clearInput = () => {
+  const clearImageInput = () => {
     form.setValue("beforeImage", "");
     setPreview("");
   };
@@ -191,6 +319,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
                       <div className="relative">
                         <Input
                           type="text"
+                          readOnly={preview === null ? false : true}
                           placeholder="Enter a URL, paste a file, or drag a file over."
                           className="mb-2"
                           {...field}
@@ -222,10 +351,11 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
                       ) : (
                         <div className="relative mt-4">
                           {
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
+                            <Image
                               src={preview}
                               alt="Preview"
+                              width={800}
+                              height={450}
                               className="max-w-full h-auto max-h-64 object-contain"
                             />
                           }
@@ -234,7 +364,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
                             variant="destructive"
                             size="sm"
                             className="absolute top-0 right-0 m-2"
-                            onClick={clearInput}
+                            onClick={clearImageInput}
                           >
                             <Trash className="h-4 w-4" />
                             <span className="text-xs">clear input</span>
@@ -320,8 +450,21 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
                   />
                 )}
               />
-              <Button type="submit" className="w-full md:hidden">
-                <span>Generate Interior Design</span>
+              <Button
+                disabled={isLoading}
+                type="submit"
+                className="w-full capitalize md:hidden"
+              >
+                {isLoading ? (
+                  <>
+                    <span className="flex items-center justify-center">
+                      <Loader className="mr-2 h-4 w-4 animate-spin" />
+                      processing request...
+                    </span>
+                  </>
+                ) : (
+                  "Generate interior design"
+                )}
               </Button>
             </form>
           </Form>
@@ -329,11 +472,21 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
       </ScrollArea>
       <div className="p-4 bg-background border-t border-r border-t-border">
         <Button
+          disabled={isLoading}
           type="submit"
-          className="w-full hidden md:block"
+          className="w-full capitalize hidden md:block"
           onClick={form.handleSubmit(onSubmit)}
         >
-          Generate Interior Design
+          {isLoading ? (
+            <>
+              <span className="flex items-center justify-center">
+                <Loader className="mr-2 h-4 w-4 animate-spin" />
+                processing request...
+              </span>
+            </>
+          ) : (
+            "Generate interior design"
+          )}
         </Button>
       </div>
     </div>
