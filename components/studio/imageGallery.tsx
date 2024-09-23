@@ -17,7 +17,7 @@ const ImageGallery = ({ user }: imageGalleryProps) => {
     <ScrollArea className="h-full">
       {images?.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-          {images.map((img, index) => (
+          {images.reverse().map((img, index) => (
             <div
               key={index}
               className="relative aspect-video bg-foreground/10 rounded-lg overflow-hidden"
@@ -35,7 +35,7 @@ const ImageGallery = ({ user }: imageGalleryProps) => {
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   style={{ objectFit: "cover" }}
-                  className="rounded-lg"
+                  className="rounded-lg border"
                 />
               )}
             </div>

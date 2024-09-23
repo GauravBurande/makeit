@@ -24,7 +24,6 @@ import MaterialsSelector from "./formItems/materials";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "../ui/toast";
 import { PlainUser } from "@/helpers/types";
-import { uploadImageFileAndReturnUrl } from "@/lib/r2";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -222,31 +221,60 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
 
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10mb
 
-  // todo: use this function when got r2 setup done
+  // todo: use this after r2 setup done
   // const handleFile = async (file: File) => {
   //   if (file.size > MAX_FILE_SIZE) {
-  //     console.error("File is too large. Maximum size is 10MB.");
+  //     toast({
+  //       variant: "destructive",
+  //       title: "Image File is too large",
+  //       description: "Maximum image file size is 10MB.",
+  //     });
   //     return;
   //   }
 
   //   try {
-  //     // Generate a unique filename
-  //     const filename = `${Date.now()}-${file.name}`;
+  //     const formData = new FormData();
+  //     formData.append("file", file);
+  //     formData.append("fileName", file.name);
+  //     formData.append("fileSize", file.size.toString());
+  //     formData.append("fileType", file.type);
+  //     formData.append("userId", user._id);
 
-  //     // Upload the file to R2 and get the URL directly
-  //     const fileUrl = await uploadImageFileAndReturnUrl(file, filename);
-  //     if(!fileUrl) {
+  //     const response = await fetch("/api/image-upload", {
+  //       method: "POST",
+  //       body: formData,
+  //     });
+
+  //     if (!response.ok) {
   //       toast({
   //         variant: "destructive",
-  //         title: "Something went wrong!",
-  //         description: "Failed to upload image, try again!",
-  //       })
-  //       return;
+  //         title: "Upload failed",
+  //         description: "Failed to upload image. Please try again.",
+  //       });
   //     }
+
+  //     const data = await response.json();
+  //     const fileUrl = data.fileUrl;
+
+  //     if (!fileUrl) {
+  //       throw new Error("No file URL returned from server");
+  //     }
+
+  //     // Update preview and form value
   //     setPreview(fileUrl);
   //     form.setValue("beforeImage", fileUrl);
+
+  //     toast({
+  //       title: "Success",
+  //       description: "Image uploaded successfully!",
+  //     });
   //   } catch (error) {
   //     console.error("Error uploading file:", error);
+  //     toast({
+  //       variant: "destructive",
+  //       title: "Image Upload failed",
+  //       description: "Failed to upload image. Please try again.",
+  //     });
   //   }
   // };
 
@@ -291,7 +319,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
 
   const clearImageInput = () => {
     form.setValue("beforeImage", "");
-    setPreview("");
+    setPreview(null);
   };
 
   return (
@@ -343,7 +371,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
                           <input
                             id={`file-upload-beforeImage`}
                             type="file"
-                            accept="image/*"
+                            accept="image/png, image/jpeg, image/jpg, image/webp"
                             onChange={handleChange}
                             className="hidden"
                           />

@@ -4,12 +4,13 @@ import { colors, materials, roomTypes, styles } from "@/helpers/constants";
 
 export interface IInteriorImage extends Document {
   userId: mongoose.Schema.Types.ObjectId; // Reference to the User model
-  prediction?: string;
+  predictionId?: string;
+  status?: string;
   beforeImage: string; // URL to the before image stored in Cloudflare R2
   afterImage?: string; // URL to the after image stored in Cloudflare R2
   prompt: string; // AI-generated prompt used to create the image
   negativePrompt: string; // Negative prompt for AI generation
-  beforeImageSize: number; // Image size of the before image in KBs
+  beforeImageSize?: number; // Image size of the before image in KBs
   afterImageSize?: number; // Image size of the after image in KBs
   style?: string; // Interior design style (e.g., Modern, Rustic, Minimalist)
   roomType?: string; // Room type (e.g., Bedroom, Kitchen, Hall, Bathroom, Dining Room)
@@ -24,7 +25,10 @@ const interiorImageSchema = new Schema<IInteriorImage>(
       ref: "User",
       required: true,
     },
-    prediction: {
+    predictionId: {
+      type: String,
+    },
+    status: {
       type: String,
     },
     beforeImage: {
@@ -44,7 +48,7 @@ const interiorImageSchema = new Schema<IInteriorImage>(
     },
     beforeImageSize: {
       type: Number,
-      required: true,
+      required: false,
     },
     afterImageSize: {
       type: Number,

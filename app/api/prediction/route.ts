@@ -29,6 +29,12 @@ async function createReplicatePrediction(input: any) {
     throw new Error("REPLICATE_API_KEY is not set");
   }
 
+  const webhookEndPoint = `${
+    process.env.NODE_ENV === "production"
+      ? "https://makeit.ai"
+      : "https://open-deeply-coyote.ngrok-free.app"
+  }/api/webhook/prediction`;
+
   const response = await fetch(REPLICATE_API_URL, {
     method: "POST",
     headers: {
@@ -37,6 +43,8 @@ async function createReplicatePrediction(input: any) {
     },
     body: JSON.stringify({
       version: REPLICATE_MODEL_VERSION,
+      // webhook: webhookEndPoint,
+      // webhook_events_filter: ["completed", "failed"],
       input: {
         prompt: input.prompt,
         image: input.image,
@@ -46,6 +54,7 @@ async function createReplicatePrediction(input: any) {
   });
 
   if (!response.ok) {
+    console.log(response);
     throw new Error(`Failed to create prediction: ${response.statusText}`);
   }
   return response.json();
@@ -83,28 +92,6 @@ const createInteriorPrompt = (
   return interiorPrompt;
 };
 
-async function getImageSize(url: string): Promise<number> {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const contentLength = response.headers.get("content-length");
-    if (!contentLength) {
-      throw new Error("Content-Length header is missing");
-    }
-
-    const sizeInBytes = parseInt(contentLength, 10);
-    const sizeInKB = Number((sizeInBytes / 1024).toFixed(2));
-
-    return sizeInKB;
-  } catch (error) {
-    console.error("Error fetching image size:", error);
-    throw error;
-  }
-}
-
 export async function POST(req: Request) {
   let session: mongoose.ClientSession | null = null;
   try {
@@ -114,7 +101,7 @@ export async function POST(req: Request) {
     }
 
     const body: RequestBody = await req.json();
-    console.log("body: ", body);
+    console.info("body: ", body);
     const {
       userId,
       prompt,
@@ -139,9 +126,6 @@ export async function POST(req: Request) {
       negativePrompt,
     });
 
-    const beforeImageSize = await getImageSize(image);
-    console.log("beoforeImageSize: ", beforeImageSize);
-
     const isTransactionSupported = await isTransactionEnabled(conn as any);
 
     if (isTransactionSupported) {
@@ -152,12 +136,11 @@ export async function POST(req: Request) {
     const interiorImage = await InteriorImage.create(
       [
         {
-          prediction: prediction.id,
+          predictionId: prediction.id,
           userId,
           prompt,
           beforeImage: image,
           afterImage: "",
-          beforeImageSize, // in KBs
           negativePrompt,
           style,
           roomType,
@@ -178,9 +161,6 @@ export async function POST(req: Request) {
             imageId: interiorImage[0]._id,
             imageUrl: "",
           },
-        },
-        $inc: {
-          storageUsed: beforeImageSize,
         },
       },
       session ? { new: true, session } : { new: true }

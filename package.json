@@ -46,6 +46,7 @@
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.53.0",
+    "replicate": "^0.33.0",
     "sharp": "^0.33.5",
     "stripe": "^16.10.0",
     "tailwind-merge": "^2.3.0",
