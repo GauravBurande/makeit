@@ -28,7 +28,6 @@ export async function POST(req: Request) {
 
     await connectMongo();
 
-    // Check if this prediction has already been processed
     const existingImage = await InteriorImage.findOne({
       predictionId: body.id,
       status: { $in: ["completed", "failed"] },
@@ -43,45 +42,47 @@ export async function POST(req: Request) {
       // Get the prediction result
       const imageUrl = body.output;
 
-      const imageResponse = await fetch(imageUrl);
-      const imageBuffer = await imageResponse.arrayBuffer();
+      // todo: uncomment this after done with r2 setup
+      //   const imageResponse = await fetch(imageUrl);
+      //   const imageBuffer = await imageResponse.arrayBuffer();
 
-      const fileSizeInKB = imageBuffer.byteLength / 1024;
-      console.log("Original image size:", fileSizeInKB.toFixed(2), "KB");
+      //   const fileSizeInKB = imageBuffer.byteLength / 1024;
+      //   console.log("Original image size:", fileSizeInKB.toFixed(2), "KB");
 
-      let quality = 90;
-      if (fileSizeInKB > 15000) {
-        quality = 70;
-      } else if (fileSizeInKB > 10000) {
-        quality = 80;
-      }
+      //   let quality = 90;
+      //   if (fileSizeInKB > 15000) {
+      //     quality = 70;
+      //   } else if (fileSizeInKB > 10000) {
+      //     quality = 80;
+      //   }
 
-      const compressedImage = await sharp(Buffer.from(imageBuffer))
-        .png({ quality: quality })
-        .toBuffer();
+      //   const compressedImage = await sharp(Buffer.from(imageBuffer))
+      //     .png({ quality: quality })
+      //     .toBuffer();
 
-      const compressedSizeInKB = compressedImage.length / 1024;
-      console.log(
-        "Compressed image size:",
-        compressedSizeInKB.toFixed(2),
-        "KB"
-      );
+      //   const compressedSizeInKB = compressedImage.length / 1024;
+      //   console.log(
+      //     "Compressed image size:",
+      //     compressedSizeInKB.toFixed(2),
+      //     "KB"
+      //   );
 
-      // Convert Buffer to File and upload to R2
-      const filename = `${Date.now()}-${body.id}.png`;
-      const fileToUpload = bufferToFile(compressedImage, filename, "image/png");
-      const uploadedUrl = await uploadImageFileAndReturnUrl(
-        fileToUpload,
-        filename
-      );
+      //   // Convert Buffer to File and upload to R2
+      //   const filename = `${Date.now()}-${body.id}.png`;
+      //   const fileToUpload = bufferToFile(compressedImage, filename, "image/png");
+      //   const uploadedUrl = await uploadImageFileAndReturnUrl(
+      //     fileToUpload,
+      //     filename
+      //   );
 
       const interiorImage = await InteriorImage.findOneAndUpdate(
         { predictionId: body.id },
         {
           $set: {
-            afterImage: uploadedUrl,
+            afterImage: imageUrl,
+            // afterImage: uploadedUrl,
             status: "completed",
-            afterImageSize: Math.round(compressedSizeInKB),
+            // afterImageSize: Math.round(compressedSizeInKB),
           },
         },
         { new: true }
@@ -102,11 +103,12 @@ export async function POST(req: Request) {
         },
         {
           $inc: {
-            storageUsed: Math.round(compressedSizeInKB),
+            // storageUsed: Math.round(compressedSizeInKB),
             usedImages: 1,
           },
           $set: {
-            "interiorImages.$.imageUrl": uploadedUrl,
+            "interiorImages.$.imageUrl": imageUrl,
+            // "interiorImages.$.imageUrl": uploadedUrl,
           },
         },
         { new: true }
@@ -145,7 +147,8 @@ export async function POST(req: Request) {
 
       const user = await User.findOneAndUpdate(
         {
-          "interiorImages.predictionId": body.id,
+          _id: interiorImage.userId,
+          "interiorImages.imageId": interiorImage.id,
         },
         {
           $set: {

@@ -43,8 +43,8 @@ async function createReplicatePrediction(input: any) {
     },
     body: JSON.stringify({
       version: REPLICATE_MODEL_VERSION,
-      // webhook: webhookEndPoint,
-      // webhook_events_filter: ["completed", "failed"],
+      webhook: webhookEndPoint,
+      webhook_events_filter: ["completed"],
       input: {
         prompt: input.prompt,
         image: input.image,
