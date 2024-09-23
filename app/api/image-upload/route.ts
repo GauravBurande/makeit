@@ -34,6 +34,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         .json({ error: "File is too large. Maximum size is 10MB." });
     }
 
+    // todo: compress images using sharp before uploading to the r2
     const filename = `${Date.now()}-${fileName}`;
 
     // Create a File-like object from the Buffer
