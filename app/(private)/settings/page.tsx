@@ -13,7 +13,7 @@ import {
   Clock,
   CreditCard,
   HardDrive,
-  Image,
+  ImageIcon,
   Mail,
 } from "lucide-react";
 import UsageCard from "@/components/studio/blocks/usage";
@@ -33,7 +33,7 @@ export default function Settings() {
   );
 }
 
-export const AccountOverview = async () => {
+const AccountOverview = async () => {
   const user = await getUser();
   if (!user) {
     return null;
@@ -54,7 +54,7 @@ export const AccountOverview = async () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <UsageCard
-            icon={<Image className="h-5 w-5 text-muted-foreground" />}
+            icon={<ImageIcon className="h-5 w-5 text-muted-foreground" />}
             title="Image Usage"
             used={user?.usedImages || 0}
             limit={user?.imageLimit || 0}
@@ -88,7 +88,7 @@ const getStatusColor = (status: string): string => {
   }
 };
 
-export const BillingSection = async () => {
+const BillingSection = async () => {
   let billing: any = await getBilling();
   if (!billing) {
     billing = {
@@ -100,17 +100,6 @@ export const BillingSection = async () => {
       endedAt: undefined,
     };
   }
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "active":
-        return "bg-green-500";
-      case "unpaid":
-        return "bg-red-500";
-      default:
-        return "bg-yellow-500";
-    }
-  };
 
   return (
     <Card id="billing">
