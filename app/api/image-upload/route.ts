@@ -12,7 +12,7 @@ export const config = {
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
 
-export default async function POST(req: NextApiRequest, res: NextApiResponse) {
+export async function POST(req: NextApiRequest, res: NextApiResponse) {
   await connectMongo();
   try {
     const contentType = req.headers["content-type"];
