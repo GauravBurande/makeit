@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { DangerZone } from "@/components/blocks/dangerZone";
 import { getBilling, getUser } from "@/lib/db";
 import { PlainUser } from "@/helpers/types";
+import { useRouter } from "next/navigation";
 
 interface UserProps {
   user: PlainUser;
@@ -105,6 +106,8 @@ const BillingSection = async ({ user }: UserProps) => {
     };
   }
 
+  const router = useRouter();
+
   const handleBilling = async () => {
     try {
       if (user.hasAccess) {
@@ -123,7 +126,7 @@ const BillingSection = async ({ user }: UserProps) => {
           window.location.href = data.url;
         }
       } else {
-        // Create a new subscription
+        router.push("/studio#upgrade");
       }
     } catch (error) {}
   };
