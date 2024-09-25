@@ -22,22 +22,26 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DangerZone } from "@/components/blocks/dangerZone";
 import { getBilling, getUser } from "@/lib/db";
+import { PlainUser } from "@/helpers/types";
 
-export default function Settings() {
-  return (
-    <main className="min-h-screen space-y-12 p-10 w-full max-w-3xl mx-auto">
-      <AccountOverview />
-      <BillingSection />
-      <DangerZone />
-    </main>
-  );
+interface UserProps {
+  user: PlainUser;
 }
-
-const AccountOverview = async () => {
+export default async function Settings() {
   const user = await getUser();
   if (!user) {
     return null;
   }
+  return (
+    <main className="min-h-screen space-y-12 p-10 w-full max-w-3xl mx-auto">
+      <AccountOverview user={user} />
+      <BillingSection />
+      <DangerZone user={user} />
+    </main>
+  );
+}
+
+const AccountOverview = async ({ user }: UserProps) => {
   return (
     <Card id="account" className="w-full">
       <CardHeader>
