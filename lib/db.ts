@@ -59,7 +59,7 @@ export const getUser = cache(async (): Promise<PlainUser | null> => {
   }
 });
 
-export const getBilling = cache(async () => {
+export const getBilling = async () => {
   try {
     // @ts-ignore
     const session = await getServerSession(authOptions);
@@ -77,4 +77,4 @@ export const getBilling = cache(async () => {
     console.error(error);
     return null;
   }
-});
+};
