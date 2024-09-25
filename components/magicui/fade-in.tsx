@@ -51,7 +51,7 @@ export function Fade({
       viewport={{ once: true }}
       variants={FADE_ANIMATION_VARIANTS}
     >
-      <motion.div className={className}>{children}</motion.div>
+      <div className={className}>{children}</div>
     </motion.div>
   );
 }

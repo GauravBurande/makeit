@@ -17,12 +17,15 @@ const Hero = ({ session }: Props) => {
   return (
     <section className="overflow-hidden flex flex-col items-center justify-center py-12 px-4">
       <main className="text-center mb-12">
-        <h1 className="text-4xl md:text-6xl max-w-5xl leading-snug text-foreground/80 font-bold mb-6">
-          <Fade>Design your rooms and change the way they look</Fade>
-        </h1>
+        <Fade direction="up">
+          <h1 className="text-4xl md:text-6xl max-w-5xl leading-snug text-foreground/80 font-bold mb-6">
+            Design your rooms and change the way they look
+          </h1>
+        </Fade>
         <Fade
+          direction="up"
           framerProps={{
-            show: { transition: { delay: 0.4 } },
+            show: { transition: { delay: 0.2 } },
           }}
         >
           <p className="text-xl text-accent max-w-2xl mx-auto">

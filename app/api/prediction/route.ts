@@ -174,7 +174,8 @@ export async function POST(req: Request) {
       await session.commitTransaction();
     }
 
-    revalidatePath("/studio");
+    // todo: if image gallery doesn't update on prod uncomment this
+    // revalidatePath("/studio");
 
     return new Response(JSON.stringify(prediction), { status: 201 });
   } catch (error) {

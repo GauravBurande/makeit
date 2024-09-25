@@ -8,7 +8,6 @@ import { uploadImageFileAndReturnUrl } from "@/lib/r2";
 import User from "@/models/User";
 import InteriorImage from "@/models/InteriorImage";
 import connectMongo from "@/lib/mongoose";
-import { revalidatePath } from "next/cache";
 
 // convert Buffer to File
 function bufferToFile(
@@ -171,8 +170,6 @@ export async function POST(req: Request) {
       console.log("Prediction not yet completed");
       return NextResponse.json({ message: "Prediction not yet completed" });
     }
-
-    revalidatePath(`/studio`);
 
     return NextResponse.json({ message: "Processed successfully" });
   } catch (e) {
