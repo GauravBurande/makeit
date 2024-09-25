@@ -37,11 +37,7 @@ interface PricingProps {
   isDialog?: boolean;
 }
 
-const PricingTable: React.FC<PricingProps> = ({
-  checkout,
-  plans,
-  isDialog = false,
-}) => {
+const PricingTable: React.FC<PricingProps> = ({ checkout, plans }) => {
   const [isYearly, setIsYearly] = useState(true);
 
   return (
@@ -137,7 +133,7 @@ const ButtonCheckout: React.FC<ButtonCheckoutProps> = ({
   checkout = false,
   popular = false,
   priceId,
-  mode = "payment",
+  mode = "subscription",
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
