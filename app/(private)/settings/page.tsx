@@ -35,7 +35,7 @@ export default async function Settings() {
   return (
     <main className="min-h-screen space-y-12 p-10 w-full max-w-3xl mx-auto">
       <AccountOverview user={user} />
-      <BillingSection />
+      <BillingSection user={user} />
       <DangerZone user={user} />
     </main>
   );
@@ -92,7 +92,7 @@ const getStatusColor = (status: string): string => {
   }
 };
 
-const BillingSection = async () => {
+const BillingSection = async ({ user }: UserProps) => {
   let billing: any = await getBilling();
   if (!billing) {
     billing = {
@@ -104,6 +104,29 @@ const BillingSection = async () => {
       endedAt: undefined,
     };
   }
+
+  const handleBilling = async () => {
+    try {
+      if (user.hasAccess) {
+        const response = await fetch("/api/stripe/create-portal", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            returnUrl: window.location.origin,
+          }),
+        });
+
+        const data = await response.json();
+        if (data.url) {
+          window.location.href = data.url;
+        }
+      } else {
+        // Create a new subscription
+      }
+    } catch (error) {}
+  };
 
   return (
     <Card id="billing">
@@ -188,7 +211,7 @@ const BillingSection = async () => {
       </CardContent>
       <CardFooter>
         {/* todo: add link to manage subscription */}
-        <Button className="w-full">
+        <Button onClick={handleBilling} className="w-full">
           {billing?.endedAt
             ? "Renew Subscription"
             : billing?.cancelAtPeriodEnd
