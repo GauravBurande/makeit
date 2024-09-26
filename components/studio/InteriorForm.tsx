@@ -108,7 +108,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
         console.log("Checking user images");
         console.log("sleepCount:", sleepCount);
 
-        // todo: relivalidate if not working in prod
+        // todo: relivalidate if not working in prod, ok?
         // const result = await revalidateStudioPath();
 
         const hasEmptyImage = (user.interiorImages || []).some(
