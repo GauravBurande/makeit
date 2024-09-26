@@ -51,7 +51,6 @@ export async function POST(req: Request) {
       );
     }
   } else {
-    // Not Signed in
     return NextResponse.json({ error: "Not signed in" }, { status: 401 });
   }
 }

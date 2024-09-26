@@ -1,7 +1,9 @@
 import connectMongo from "@/lib/mongoose";
+import { authOptions } from "@/lib/next-auth";
 import InteriorImage from "@/models/InteriorImage";
 import User from "@/models/User";
 import mongoose from "mongoose";
+import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 import { env } from "process";
 
@@ -95,89 +97,97 @@ const createInteriorPrompt = (
 export async function POST(req: Request) {
   let session: mongoose.ClientSession | null = null;
   try {
-    const conn = await connectMongo();
-    if (!conn) {
-      throw new Error("Failed to connect to MongoDB");
-    }
+    // @ts-ignore
+    const user = await getServerSession(authOptions);
+    if (user) {
+      const conn = await connectMongo();
+      if (!conn) {
+        throw new Error("Failed to connect to MongoDB");
+      }
 
-    const body: RequestBody = await req.json();
-    console.info("body: ", body);
-    const {
-      userId,
-      prompt,
-      image,
-      negativePrompt,
-      style,
-      roomType,
-      color,
-      material,
-    } = body;
+      const body: RequestBody = await req.json();
+      console.info("body: ", body);
+      const {
+        userId,
+        prompt,
+        image,
+        negativePrompt,
+        style,
+        roomType,
+        color,
+        material,
+      } = body;
 
-    const interiorPrompt = createInteriorPrompt(
-      style,
-      roomType,
-      color,
-      material,
-      prompt
-    );
-    const prediction = await createReplicatePrediction({
-      prompt: interiorPrompt,
-      image,
-      negativePrompt,
-    });
+      const interiorPrompt = createInteriorPrompt(
+        style,
+        roomType,
+        color,
+        material,
+        prompt
+      );
+      const prediction = await createReplicatePrediction({
+        prompt: interiorPrompt,
+        image,
+        negativePrompt,
+      });
 
-    const isTransactionSupported = await isTransactionEnabled(conn as any);
+      const isTransactionSupported = await isTransactionEnabled(conn as any);
 
-    if (isTransactionSupported) {
-      session = await conn.startSession();
-      session.startTransaction();
-    }
+      if (isTransactionSupported) {
+        session = await conn.startSession();
+        session.startTransaction();
+      }
 
-    const interiorImage = await InteriorImage.create(
-      [
+      const interiorImage = await InteriorImage.create(
+        [
+          {
+            predictionId: prediction.id,
+            userId,
+            prompt,
+            beforeImage: image,
+            afterImage: "",
+            negativePrompt,
+            style,
+            roomType,
+            color,
+            material,
+          },
+        ],
+        session ? { session } : undefined
+      );
+
+      // Update the user document
+
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: userId },
         {
-          predictionId: prediction.id,
-          userId,
-          prompt,
-          beforeImage: image,
-          afterImage: "",
-          negativePrompt,
-          style,
-          roomType,
-          color,
-          material,
-        },
-      ],
-      session ? { session } : undefined
-    );
-
-    // Update the user document
-
-    const updatedUser = await User.findOneAndUpdate(
-      { _id: userId },
-      {
-        $push: {
-          interiorImages: {
-            imageId: interiorImage[0]._id,
-            imageUrl: "",
+          $push: {
+            interiorImages: {
+              imageId: interiorImage[0]._id,
+              imageUrl: "",
+            },
           },
         },
-      },
-      session ? { new: true, session } : { new: true }
-    );
+        session ? { new: true, session } : { new: true }
+      );
 
-    if (!updatedUser) {
-      throw new Error("User not found");
+      if (!updatedUser) {
+        throw new Error("User not found");
+      }
+
+      if (session) {
+        await session.commitTransaction();
+      }
+
+      // todo: if image gallery doesn't update on prod uncomment this
+      // revalidatePath("/studio");
+
+      return new Response(JSON.stringify(prediction), { status: 201 });
+    } else {
+      return new Response(JSON.stringify({ error: "You must be logged in!" }), {
+        status: 401,
+      });
     }
-
-    if (session) {
-      await session.commitTransaction();
-    }
-
-    // todo: if image gallery doesn't update on prod uncomment this
-    // revalidatePath("/studio");
-
-    return new Response(JSON.stringify(prediction), { status: 201 });
   } catch (error) {
     console.error("Error in POST handler:", error);
     if (session) {

@@ -26,6 +26,9 @@ import { ToastAction } from "../ui/toast";
 import { PlainUser } from "@/helpers/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { sleep } from "@/helpers/utils";
+import { revalidateStudioPath } from "@/lib/actions";
+import { revalidatePath } from "next/cache";
 
 const FormSchema = z.object({
   beforeImage: z
@@ -94,8 +97,42 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
     return () => subscription.unsubscribe();
   }, [form.watch, form]);
 
+  const polling = async () => {
+    console.log("polling started");
+    await sleep(7000);
+    console.log("initial 7s sleep");
+    let sleepCount = 1000;
+
+    const checkImages = async () => {
+      while (true) {
+        console.log("Checking user images");
+        console.log("sleepCount:", sleepCount);
+
+        // todo: relivalidate if not working in prod
+        // const result = await revalidateStudioPath();
+
+        const hasEmptyImage = (user.interiorImages || []).some(
+          (obj: any) => obj.imageUrl === ""
+        );
+
+        if (hasEmptyImage) {
+          await sleep(sleepCount);
+          sleepCount = Math.min(sleepCount * 2, 30000); // Cap at 30 seconds
+        } else {
+          router.refresh();
+          console.log("All images are populated");
+          break;
+        }
+      }
+    };
+
+    await checkImages();
+    console.log("Polling completed");
+  };
+
   const { toast } = useToast();
   const router = useRouter();
+
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     if (isLoading) return; // Prevent multiple submissions
     const errorToast = (message: string) => {
@@ -179,6 +216,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
         prompt: form.getValues("prompt"),
       });
       router.refresh();
+      await polling();
     } catch (error: any) {
       toast({
         variant: "destructive",
