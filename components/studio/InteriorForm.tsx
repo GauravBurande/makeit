@@ -28,7 +28,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { sleep } from "@/helpers/utils";
 import { revalidateStudioPath } from "@/lib/actions";
-import { revalidatePath } from "next/cache";
 
 const FormSchema = z.object({
   beforeImage: z
@@ -109,7 +108,6 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
         console.log("sleepCount:", sleepCount);
 
         // todo: relivalidate if not working in prod, ok?
-        // const result = await revalidateStudioPath();
 
         const hasEmptyImage = (user.interiorImages || []).some(
           (obj: any) => obj.imageUrl === ""
@@ -119,6 +117,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
           await sleep(sleepCount);
           sleepCount = Math.min(sleepCount * 2, 30000); // Cap at 30 seconds
         } else {
+          const result = await revalidateStudioPath();
           router.refresh();
           console.log("All images are populated");
           break;
