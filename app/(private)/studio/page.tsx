@@ -4,6 +4,8 @@ import ImageGallery from "@/components/studio/imageGallery";
 import { getUser } from "@/lib/db";
 import { redirect } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 const Studio = async () => {
   const user = await getUser();
   if (!user) {

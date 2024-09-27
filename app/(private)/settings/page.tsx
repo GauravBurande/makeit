@@ -6,9 +6,12 @@ import { getBilling, getUser } from "@/lib/db";
 import { PlainUser } from "@/helpers/types";
 import { BillingSection } from "@/components/blocks/billing";
 
+export const dynamic = "force-dynamic";
+
 interface UserProps {
   user: PlainUser;
 }
+
 export default async function Settings() {
   const user = await getUser();
   let billing: any = await getBilling();
