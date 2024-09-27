@@ -107,8 +107,6 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
         console.log("Checking user images");
         console.log("sleepCount:", sleepCount);
 
-        router.refresh();
-
         const userData = await revalidateStudioPath();
         const hasEmptyImage = ((userData as any).interiorImages || []).some(
           (obj: any) => obj.imageUrl === ""
@@ -118,6 +116,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
           await sleep(sleepCount);
           sleepCount = Math.min(sleepCount * 2, 30000); // Cap at 30 seconds
         } else {
+          router.refresh();
           console.log("All images are populated");
           break;
         }
