@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { signIn } from "next-auth/react";
 import configs from "@/config";
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
 import { IconGoogle, IconSpinner } from "./icons";
 import { Key } from "lucide-react";
 
@@ -17,13 +16,15 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [lastUsedMethod, setLastUsedMethod] = useState<string | null>(null);
-
-  const searchParams = useSearchParams();
-  const callbackUrl = decodeURIComponent(
-    searchParams.get("callbackurl") || configs.auth.callbackUrl
-  );
+  const [callbackUrl, setCallbackUrl] = useState(configs.auth.callbackUrl);
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const callbackUrlParam = searchParams.get("callbackurl");
+    if (callbackUrlParam) {
+      setCallbackUrl(decodeURIComponent(callbackUrlParam));
+    }
+
     const storedMethod = localStorage.getItem("lastUsedSignInMethod");
     if (storedMethod) {
       setLastUsedMethod(storedMethod);
