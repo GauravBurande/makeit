@@ -34,7 +34,8 @@ async function createReplicatePrediction(input: any) {
   const webhookEndPoint = `${
     process.env.NODE_ENV === "production"
       ? "https://makeit-interior-deisgner.vercel.app/"
-      : // ? "https://makeit.ai"
+      : // todo: use this when added custom domain
+        // ? "https://makeit.ai"
         "https://open-deeply-coyote.ngrok-free.app"
   }/api/webhook/prediction`;
 
