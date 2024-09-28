@@ -127,7 +127,7 @@ export async function POST(req: Request) {
         material,
         prompt
       );
-      const prediction = await createReplicatePrediction({
+      let prediction = await createReplicatePrediction({
         prompt: interiorPrompt,
         image,
         negativePrompt,
@@ -160,6 +160,7 @@ export async function POST(req: Request) {
 
       // Update the user document
 
+      prediction.interiorImageId = interiorImage[0]._id;
       const updatedUser = await User.findOneAndUpdate(
         { _id: userId },
         {

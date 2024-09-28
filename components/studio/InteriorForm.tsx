@@ -56,6 +56,10 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
   const [dragActive, setDragActive] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [predictions, setPredictions] = useState<string[]>([]);
+
+  const { toast } = useToast();
+  const router = useRouter();
 
   const defaultValues = {
     beforeImage: "",
@@ -96,42 +100,104 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
     return () => subscription.unsubscribe();
   }, [form.watch, form]);
 
-  const polling = async () => {
-    console.log("polling started");
+  const PredictionLimits: any = {
+    Personal: 4,
+    Pro: 8,
+    Premium: 16,
+  };
+
+  const updateLoadingState = useCallback(
+    (userData: any) => {
+      const userPlan = userData.plan || "Personal";
+      const limit = PredictionLimits[userPlan] || PredictionLimits.Personal;
+      setIsLoading(predictions.length >= limit);
+    },
+    [predictions]
+  );
+
+  const polling = useCallback(async () => {
+    console.log("Polling started");
     await sleep(7000);
-    console.log("initial 7s sleep");
-    let sleepCount = 1000;
+    console.log("Initial 7s sleep completed");
+
+    let totalAttempts = 0;
+    const MAX_ATTEMPTS = 30;
 
     const checkImages = async () => {
-      while (true) {
-        console.log("Checking user images");
-        console.log("sleepCount:", sleepCount);
-
-        const userData = await revalidateStudioPath();
-        const hasEmptyImage = ((userData as any).interiorImages || []).some(
-          (obj: any) => obj.imageUrl === ""
+      let sleepCount = 1000;
+      while (predictions.length > 0 && totalAttempts < MAX_ATTEMPTS) {
+        totalAttempts++;
+        console.log(
+          `Attempt ${totalAttempts}: Checking user images. Remaining predictions: ${predictions.length}`
         );
+        console.log(`Current sleep duration: ${sleepCount}ms`);
 
-        if (hasEmptyImage) {
+        try {
+          const { user: userData } = await revalidateStudioPath();
+
+          if (!userData || !userData.interiorImages) {
+            console.log(
+              "User data or interior images not available. Waiting..."
+            );
+            await sleep(sleepCount);
+            sleepCount = Math.min(sleepCount * 2, 30000);
+            continue;
+          }
+
+          const pendingImages = userData.interiorImages.filter(
+            (obj) => obj.imageUrl === ""
+          );
+
+          if (pendingImages.length > 0) {
+            console.log(
+              `${pendingImages.length} images still pending. Waiting...`
+            );
+            await sleep(sleepCount);
+            sleepCount = Math.min(sleepCount * 2, 30000);
+          } else {
+            const processedImageIds = userData.interiorImages
+              .filter((obj) => obj.imageUrl !== "")
+              .map((obj) => obj.imageId);
+
+            const initialPredictionsLength = predictions.length;
+            setPredictions((prevPredictions) =>
+              prevPredictions.filter(
+                (pred) => !processedImageIds.includes(pred)
+              )
+            );
+
+            if (predictions.length < initialPredictionsLength) {
+              console.log(
+                `Processed ${
+                  initialPredictionsLength - predictions.length
+                } images. ${predictions.length} predictions remaining.`
+              );
+              sleepCount = 1000;
+              totalAttempts = 0;
+              updateLoadingState(userData);
+            } else {
+              console.log("No new images processed in this attempt.");
+            }
+          }
+        } catch (error) {
+          console.error("Error during polling:", error);
           await sleep(sleepCount);
-          sleepCount = Math.min(sleepCount * 2, 30000); // Cap at 30 seconds
-        } else {
-          router.refresh();
-          console.log("All images are populated");
-          break;
+          sleepCount = Math.min(sleepCount * 2, 30000);
         }
+      }
+
+      if (totalAttempts >= MAX_ATTEMPTS) {
+        console.log("Max attempts reached. Stopping polling.");
       }
     };
 
     await checkImages();
     console.log("Polling completed");
-  };
-
-  const { toast } = useToast();
-  const router = useRouter();
+  }, [predictions, updateLoadingState]);
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
-    if (isLoading) return; // Prevent multiple submissions
+    if (isLoading) return;
+
     const errorToast = (message: string) => {
       toast({
         title: "Uh oh! Have you upgraded?",
@@ -146,17 +212,31 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
         ),
       });
     };
+
     if (!user.hasAccess) {
       errorToast("It seems like you haven't purchased yet!");
       return;
     }
-    if (user.usedImages > user.imageLimit) {
+
+    const userPlan = user.plan || "Personal";
+    const predictionLimit =
+      PredictionLimits[userPlan] || PredictionLimits.Personal;
+
+    if (predictions.length >= predictionLimit) {
+      errorToast(
+        `You've reached the maximum number of predictions for your ${userPlan} plan. Please wait for some predictions to complete or upgrade your plan.`
+      );
+      return;
+    }
+
+    if (user.usedImages >= user.imageLimit) {
       errorToast(
         "It seems like you have reached your image limit. Please upgrade your account to add more images."
       );
       return;
     }
-    if (user.storageLimit < user.storageUsed) {
+
+    if (user.storageLimit <= user.storageUsed) {
       errorToast(
         "It seems like you have reached your storage limit. Please upgrade."
       );
@@ -207,6 +287,11 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
         });
         return;
       }
+      setPredictions((prev) => {
+        const newPredictions = [...prev, predictionData.interiorImageId];
+        updateLoadingState({ ...user, plan: userPlan });
+        return newPredictions;
+      });
       form.reset({
         ...defaultValues,
         beforeImage: form.getValues("beforeImage"),
@@ -220,9 +305,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
         title: error.name,
         description: error.message,
       });
-      return;
     } finally {
-      setIsLoading(false);
       localStorage.removeItem(LOCALSTORAGE_FORM_KEY);
     }
   };

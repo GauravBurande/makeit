@@ -46,7 +46,8 @@ const configs = {
       description:
         "Discover your inner designer and create your dream home with our cost-effective, user-friendly software.",
       features: [
-        "250 images per month",
+        "250 interior images per month",
+        "Create up to 4 interior designs in parallel",
         "1GB cloud storage for images",
         "AI Prompt suggestions",
         "Personal-use only",
@@ -67,7 +68,8 @@ const configs = {
       description:
         "Brainstorm ideas quickly, impress clients with stunning visuals, and close deals faster using our professional tools.",
       features: [
-        "1,000 images per month",
+        "1,000 interior images per month",
+        "Create up to 8 interior designs in parallel",
         "5GB cloud storage for images",
         "AI Prompt suggestions",
         "Commercial license",
@@ -89,7 +91,8 @@ const configs = {
       description:
         "Empower your firm with cutting-edge AI technology to enhance efficiency and stay competitive in the market.",
       features: [
-        "5,000 images per month",
+        "5,000 interior images per month",
+        "Create up to 16 interior designs in parallel",
         "25GB cloud storage for images",
         "AI Prompt suggestions",
         "Commercial license",
