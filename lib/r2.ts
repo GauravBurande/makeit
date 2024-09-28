@@ -84,10 +84,8 @@ export async function uploadImageFileAndReturnUrl(
 
     await parallelUploads.done();
 
-    // Construct and return the URL
-    // if custom domain: `https://cdn.makeit.ai/${Key}`
-    // todo: the below url might not be the safe way, use the custom domain probalby
-    return `https://${env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com/${Bucket}/${Key}`;
+    // return `https://${env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com/${Bucket}/${Key}`;
+    return `https://cdn.makeit.ai/${Key}`;
   } catch (e) {
     throw e;
   }

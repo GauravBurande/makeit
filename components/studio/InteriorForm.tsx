@@ -14,8 +14,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Loader, Trash, UploadCloud } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { ImageIcon, Loader, Trash, UploadCloud } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
 import StylesSelector from "./formItems/styles";
 import RoomTypesSelector from "./formItems/roomTypes";
@@ -27,7 +27,16 @@ import { PlainUser } from "@/helpers/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { sleep } from "@/helpers/utils";
-import { revalidateStudioPath } from "@/lib/actions";
+import { getPreviousImages, revalidateStudioPath } from "@/lib/actions";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "../ui/sheet";
+import { cn } from "@/lib/utils";
 
 const FormSchema = z.object({
   beforeImage: z
@@ -57,6 +66,8 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [predictions, setPredictions] = useState<string[]>([]);
+  const [previousImages, setPreviousImages] = useState<string[]>([]);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const { toast } = useToast();
   const router = useRouter();
@@ -133,9 +144,9 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
         console.log(`Current sleep duration: ${sleepCount}ms`);
 
         try {
-          const { user: userData } = await revalidateStudioPath();
+          const result = await revalidateStudioPath();
 
-          if (!userData || !userData.interiorImages) {
+          if (!result || !result.user || !result.user.interiorImages) {
             console.log(
               "User data or interior images not available. Waiting..."
             );
@@ -144,8 +155,10 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
             continue;
           }
 
-          const pendingImages = userData.interiorImages.filter(
-            (obj) => obj.imageUrl === ""
+          const userData = result.user;
+
+          const pendingImages = (userData as any).interiorImages.filter(
+            (obj: any) => obj.imageUrl === ""
           );
 
           if (pendingImages.length > 0) {
@@ -155,9 +168,9 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
             await sleep(sleepCount);
             sleepCount = Math.min(sleepCount * 2, 30000);
           } else {
-            const processedImageIds = userData.interiorImages
-              .filter((obj) => obj.imageUrl !== "")
-              .map((obj) => obj.imageId);
+            const processedImageIds = (userData as any).interiorImages
+              .filter((obj: any) => obj.imageUrl !== "")
+              .map((obj: any) => obj.imageId);
 
             const initialPredictionsLength = predictions.length;
             setPredictions((prevPredictions) =>
@@ -337,91 +350,61 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
     }
   };
 
-  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10mb
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-  // todo: use this after r2 setup done
-  // const handleFile = async (file: File) => {
-  //   if (file.size > MAX_FILE_SIZE) {
-  //     toast({
-  //       variant: "destructive",
-  //       title: "Image File is too large",
-  //       description: "Maximum image file size is 10MB.",
-  //     });
-  //     return;
-  //   }
-
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append("file", file);
-  //     formData.append("fileName", file.name);
-  //     formData.append("fileSize", file.size.toString());
-  //     formData.append("fileType", file.type);
-  //     formData.append("userId", user._id);
-
-  //     const response = await fetch("/api/image-upload", {
-  //       method: "POST",
-  //       body: formData,
-  //     });
-
-  //     if (!response.ok) {
-  //       toast({
-  //         variant: "destructive",
-  //         title: "Upload failed",
-  //         description: "Failed to upload image. Please try again.",
-  //       });
-  //     }
-
-  //     const data = await response.json();
-  //     const fileUrl = data.fileUrl;
-
-  //     if (!fileUrl) {
-  //       throw new Error("No file URL returned from server");
-  //     }
-
-  //     // Update preview and form value
-  //     setPreview(fileUrl);
-  //     form.setValue("beforeImage", fileUrl);
-
-  //     toast({
-  //       title: "Success",
-  //       description: "Image uploaded successfully!",
-  //     });
-  //   } catch (error) {
-  //     console.error("Error uploading file:", error);
-  //     toast({
-  //       variant: "destructive",
-  //       title: "Image Upload failed",
-  //       description: "Failed to upload image. Please try again.",
-  //     });
-  //   }
-  // };
-
-  const handleFile = (file: File) => {
+  const handleFile = async (file: File) => {
     if (file.size > MAX_FILE_SIZE) {
-      console.error("File is too large. Maximum size is 10MB.");
+      toast({
+        variant: "destructive",
+        title: "Image File is too large",
+        description: "Maximum image file size is 5MB.",
+      });
       return;
     }
 
-    const reader = new FileReader();
+    setIsLoading(true);
 
-    reader.onload = (event) => {
-      if (event.target && event.target.result) {
-        const dataUrl = event.target.result as string;
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("fileName", file.name);
+      formData.append("fileSize", file.size.toString());
+      formData.append("fileType", file.type);
+      formData.append("userId", user._id);
 
-        const objectUrl = URL.createObjectURL(file);
-        setPreview(objectUrl);
+      const response = await fetch("/api/image-upload", {
+        method: "POST",
+        body: formData,
+      });
 
-        // Set the form value with the data URL
-        form.setValue("beforeImage", dataUrl);
+      if (!response.ok) {
+        throw new Error("Failed to upload image");
       }
-    };
 
-    reader.onerror = (error) => {
-      console.error("Error reading file:", error);
-    };
+      const data = await response.json();
+      const fileUrl = data.fileUrl;
 
-    // Read the file as a data URL (base64)
-    reader.readAsDataURL(file);
+      if (!fileUrl) {
+        throw new Error("No file URL returned from server");
+      }
+
+      setPreview(fileUrl);
+      form.setValue("beforeImage", fileUrl);
+
+      toast({
+        title: "Done!",
+        description: "Image uploaded successfully!",
+      });
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      toast({
+        variant: "destructive",
+        title: "Image Upload failed",
+        description: "Failed to upload image. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handlePaste = (e: any) => {
@@ -440,6 +423,26 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
     setPreview(null);
   };
 
+  const handlePreviousImageSelect = (imageUrl: string) => {
+    setPreview(imageUrl);
+    form.setValue("beforeImage", imageUrl);
+    setIsSheetOpen(false);
+  };
+
+  const loadPreviousImages = async () => {
+    try {
+      const images = await getPreviousImages();
+      setPreviousImages(images || []);
+    } catch (error) {
+      console.error("Error fetching previous images:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to load images",
+        description: "Could not fetch previously uploaded images.",
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col h-full min-w-[24rem] md:h-[calc(100vh-80px)] md:max-h-[calc(100vh-80px)]">
       <ScrollArea>
@@ -448,7 +451,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
-                name={"beforeImage"}
+                name="beforeImage"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Image</FormLabel>
@@ -462,49 +465,106 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
                       onDrop={handleDrop}
                       onPaste={handlePaste}
                     >
-                      <div className="relative">
-                        <Input
-                          type="text"
-                          readOnly={preview === null ? false : true}
-                          placeholder="Enter a URL, paste a file, or drag a file over."
-                          className="mb-2"
-                          {...field}
-                          onChange={(e) => {
-                            field.onChange(e);
-                            if (e.target.value.startsWith("http")) {
-                              setPreview(e.target.value);
-                            }
-                          }}
-                        />
-                      </div>
                       {!preview ? (
-                        <div className="flex items-center justify-center">
-                          <label
-                            htmlFor={`file-upload-beforeImage`}
-                            className="cursor-pointer text-foreground/60 flex items-center gap-1"
-                          >
-                            <UploadCloud className="w-5 h-5" />
-                            <span>Upload a file</span>
-                          </label>
-                          <input
-                            id={`file-upload-beforeImage`}
-                            type="file"
-                            accept="image/png, image/jpeg, image/jpg, image/webp"
-                            onChange={handleChange}
-                            className="hidden"
-                          />
-                        </div>
-                      ) : (
-                        <div className="relative mt-4">
-                          {
-                            <Image
-                              src={preview}
-                              alt="Preview"
-                              width={800}
-                              height={450}
-                              className="max-w-full h-auto max-h-64 object-contain"
+                        <>
+                          <div className="relative">
+                            <Input
+                              type="text"
+                              readOnly={preview === null ? false : true}
+                              placeholder="Enter a URL, paste a file, or drag a file over."
+                              className="mb-2"
+                              {...field}
+                              onChange={(e) => {
+                                field.onChange(e);
+                                if (
+                                  e.target.value.startsWith("https://") &&
+                                  /\.(png|jpg|jpeg|webp)$/i.test(e.target.value)
+                                ) {
+                                  setPreview(e.target.value);
+                                }
+                              }}
                             />
-                          }
+                          </div>
+                          <div className="flex items-center justify-center gap-4">
+                            <label
+                              htmlFor="file-upload-beforeImage"
+                              className={cn(
+                                buttonVariants({
+                                  variant: "outline",
+                                  size: "xs",
+                                }),
+                                "text-foreground/60 cursor-pointer"
+                              )}
+                            >
+                              <UploadCloud className="w-5 h-5" />
+                              <span>Upload the image</span>
+                            </label>
+                            <input
+                              id="file-upload-beforeImage"
+                              type="file"
+                              accept="image/png, image/jpeg, image/jpg, image/webp"
+                              onChange={handleChange}
+                              className="hidden"
+                            />
+                            <Sheet
+                              open={isSheetOpen}
+                              onOpenChange={setIsSheetOpen}
+                            >
+                              <SheetTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="xs"
+                                  onClick={loadPreviousImages}
+                                  className="flex items-center text-foreground/60 gap-2"
+                                >
+                                  <ImageIcon className="w-4 h-4" />
+                                  <span>Previous Uploads</span>
+                                </Button>
+                              </SheetTrigger>
+                              <SheetContent
+                                side="right"
+                                className="w-[80vw] sm:w-[80vw]"
+                              >
+                                <SheetHeader>
+                                  <SheetTitle>Previous Uploads</SheetTitle>
+                                </SheetHeader>
+                                {previousImages.length > 0 ? (
+                                  <div className="flex flex-wrap gap-4 mt-4 max-h-[calc(100vh-8rem)] overflow-y-auto">
+                                    {previousImages.map((image, index) => (
+                                      <div
+                                        key={index}
+                                        className="relative cursor-pointer w-72 h-44"
+                                        onClick={() =>
+                                          handlePreviousImageSelect(image)
+                                        }
+                                      >
+                                        <Image
+                                          src={image}
+                                          alt={`Previous upload ${index + 1}`}
+                                          fill
+                                          className="object-cover rounded-md"
+                                        />
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center justify-center h-full w-full">
+                                    <SheetClose>No previous uploads</SheetClose>
+                                  </div>
+                                )}
+                              </SheetContent>
+                            </Sheet>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="relative">
+                          <Image
+                            src={preview}
+                            alt="Preview"
+                            width={800}
+                            height={450}
+                            className="max-w-full h-auto max-h-64 object-contain"
+                          />
                           <Button
                             type="button"
                             variant="destructive"
@@ -515,6 +575,12 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
                             <Trash className="h-4 w-4" />
                             <span className="text-xs">clear input</span>
                           </Button>
+                        </div>
+                      )}
+                      {isLoading && (
+                        <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+                          <Loader className="h-8 w-8 animate-spin" />
+                          <span className="ml-2">Uploading...</span>
                         </div>
                       )}
                     </div>
