@@ -39,12 +39,35 @@ export async function POST(req: NextRequest) {
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
+      // Detect file type
+      const fileType = await sharp(buffer)
+        .metadata()
+        .then((info) => info.format);
+
       // Compress image
       let quality = 90;
+      let compressedImage;
+      let outputFormat;
 
-      const compressedImage = await sharp(buffer)
-        .png({ quality: quality })
-        .toBuffer();
+      switch (fileType) {
+        case "jpeg":
+        case "jpg":
+          compressedImage = await sharp(buffer).jpeg({ quality }).toBuffer();
+          outputFormat = "jpeg";
+          break;
+        case "png":
+          compressedImage = await sharp(buffer).png({ quality }).toBuffer();
+          outputFormat = "png";
+          break;
+        case "webp":
+          compressedImage = await sharp(buffer).webp({ quality }).toBuffer();
+          outputFormat = "webp";
+          break;
+        default:
+          // For unsupported formats, we'll convert to PNG
+          compressedImage = await sharp(buffer).png({ quality }).toBuffer();
+          outputFormat = "png";
+      }
 
       const compressedSizeInKB = compressedImage.byteLength / 1024;
       console.log(
@@ -57,9 +80,9 @@ export async function POST(req: NextRequest) {
       const fileName = `${Date.now()}-${file.name.replace(
         /\.[^/.]+$/,
         ""
-      )}.png`;
+      )}.${outputFormat}`;
       const compressedFile = new File([compressedImage], fileName, {
-        type: "image/png",
+        type: `image/${outputFormat}`,
       });
 
       // Upload the compressed file
@@ -78,7 +101,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "User not found" }, { status: 404 });
       }
 
-      const addedBeforeImage = BeforeImage.create({
+      const addedBeforeImage = await BeforeImage.create({
         userId,
         imageUrl: fileUrl,
       });
