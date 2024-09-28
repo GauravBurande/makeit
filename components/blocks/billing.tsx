@@ -155,7 +155,6 @@ export const BillingSection = ({ user, billing }: BillingProps) => {
         )}
       </CardContent>
       <CardFooter>
-        {/* todo: add link to manage subscription */}
         <Button onClick={handleBilling} className="w-full">
           {billing?.endedAt
             ? "Renew Subscription"

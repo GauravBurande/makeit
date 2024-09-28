@@ -65,6 +65,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
   const [dragActive, setDragActive] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [predictions, setPredictions] = useState<string[]>([]);
   const [previousImages, setPreviousImages] = useState<string[]>([]);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -362,7 +363,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
       return;
     }
 
-    setIsLoading(true);
+    setUploading(true);
 
     try {
       const formData = new FormData();
@@ -403,7 +404,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
         description: "Failed to upload image. Please try again.",
       });
     } finally {
-      setIsLoading(false);
+      setUploading(false);
     }
   };
 
@@ -577,7 +578,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
                           </Button>
                         </div>
                       )}
-                      {isLoading && (
+                      {uploading && (
                         <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
                           <Loader className="h-8 w-8 animate-spin" />
                           <span className="ml-2">Uploading...</span>
