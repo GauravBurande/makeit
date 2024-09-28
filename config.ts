@@ -12,9 +12,9 @@ const configs = {
     onlyShowOnRoutes: ["/"],
   },
   r2: {
-    bucket: "bucket-name",
-    bucketUrl: `https://bucket-name.s3.amazonaws.com/`,
-    cdn: "https://cdn-id.cloudfront.net/",
+    bucket: "makeit",
+    bucketUrl: `https://cdn.makeit.ai`,
+    cdn: "https://cdn-id.cloudfront.net",
   },
   mailgun: {
     subdomain: "mg",

@@ -8,6 +8,7 @@ import { uploadImageFileAndReturnUrl } from "@/lib/r2";
 import User from "@/models/User";
 import InteriorImage from "@/models/InteriorImage";
 import connectMongo from "@/lib/mongoose";
+import configs from "@/config";
 
 // convert Buffer to File
 function bufferToFile(
@@ -124,7 +125,7 @@ export async function POST(req: Request) {
       console.log("Webhook processing completed successfully");
     } else if (body.status === "failed") {
       // Process failed prediction
-      const failedImage = "/failed.png";
+      const failedImage = `${configs.r2.bucketUrl}/public/failed.png`;
       const interiorImage = await InteriorImage.findOneAndUpdate(
         { predictionId: body.id },
         {

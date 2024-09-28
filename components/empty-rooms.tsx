@@ -2,11 +2,12 @@ import React from "react";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
+import configs from "@/config";
 
-const emptyRoomImage = "/beforeafters/room.jpg";
-const designedRoom1 = "/beforeafters/room1.png";
-const designedRoom2 = "/beforeafters/room2.png";
-const designedRoom3 = "/beforeafters/room3.png";
+const emptyRoomImage = `${configs.r2.bucketUrl}/public/beforeafters/room.jpg`;
+const designedRoom1 = `${configs.r2.bucketUrl}/public/beforeafters/room1.png`;
+const designedRoom2 = `${configs.r2.bucketUrl}/public/beforeafters/room2.png`;
+const designedRoom3 = `${configs.r2.bucketUrl}/public/beforeafters/room3.png`;
 
 const DesignEmptyRooms = () => {
   return (

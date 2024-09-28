@@ -4,6 +4,17 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import BeforeAfterSlider from "./ui/beforeAfter";
 import Link from "next/link";
+import configs from "@/config";
+
+const designImages = [
+  "/designs/7.png",
+  "/designs/8.png",
+  "/designs/9.png",
+  "/designs/10.png",
+];
+
+const beforeImage = `${configs.r2.bucketUrl}/public/beforeafters/before2.webp`;
+const afterImage = `${configs.r2.bucketUrl}/public/beforeafters/after2.png`;
 
 const HowItWorks = () => {
   return (
@@ -43,8 +54,8 @@ const HowItWorks = () => {
             that looks good and better!
           </p>
           <BeforeAfterSlider
-            beforeImage="/beforeafters/before2.webp"
-            afterImage="/beforeafters/after2.png"
+            beforeImage={beforeImage}
+            afterImage={afterImage}
           />
         </CardContent>
       </Card>
@@ -80,34 +91,16 @@ const HowItWorks = () => {
             looking interior designs for your rooms.
           </p>
           <div className="grid grid-cols-2 gap-4">
-            <Image
-              width={512}
-              height={512}
-              src="/designs/7.png"
-              alt="Room design 1"
-              className="w-full h-44 sm:h-48 object-cover rounded-lg"
-            />
-            <Image
-              width={512}
-              height={512}
-              src="/designs/8.png"
-              alt="Room design 2"
-              className="w-full h-44 sm:h-48 object-cover rounded-lg"
-            />
-            <Image
-              width={512}
-              height={512}
-              src="/designs/9.png"
-              alt="Room design 3"
-              className="w-full h-44 sm:h-48 object-cover rounded-lg"
-            />
-            <Image
-              width={512}
-              height={512}
-              src="/designs/10.png"
-              alt="Room design 4"
-              className="w-full h-44 sm:h-48 object-cover rounded-lg"
-            />
+            {designImages.map((src, index) => (
+              <Image
+                key={index}
+                width={512}
+                height={512}
+                src={src}
+                alt={`Room design ${index + 1}`}
+                className="w-full h-44 sm:h-48 object-cover rounded-lg"
+              />
+            ))}
           </div>
         </CardContent>
       </Card>

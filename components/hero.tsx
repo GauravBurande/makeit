@@ -4,6 +4,7 @@ import Marquee from "./magicui/marquee";
 import Image from "next/image";
 import { Fade } from "./magicui/fade-in";
 import Link from "next/link";
+import configs from "@/config";
 
 interface Props {
   session: any;
@@ -11,7 +12,7 @@ interface Props {
 
 const Hero = ({ session }: Props) => {
   const designs = Array.from({ length: 9 }, (_, index) => ({
-    src: `/designs/${index + 1}.png`,
+    src: `${configs.r2.bucketUrl}/public/designs/${index + 1}.png`,
   }));
 
   return (
