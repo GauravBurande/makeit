@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -62,6 +62,8 @@ interface interiorFormProps {
   user: PlainUser;
 }
 export function InteriorDesignForm({ user }: interiorFormProps) {
+  const predictionsRef = useRef<any>([]);
+
   const [dragActive, setDragActive] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -114,7 +116,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
 
   const PredictionLimits: any = {
     Personal: 4,
-    Pro: 8,
+    Pro: 2, //todo: change to 8, 2 is just for testing
     Premium: 16,
   };
 
@@ -129,25 +131,29 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
 
   const polling = useCallback(async () => {
     console.log("Polling started");
-    await sleep(7000);
     console.log("Initial 7s sleep completed");
 
     let totalAttempts = 0;
-    const MAX_ATTEMPTS = 30;
+    const MAX_ATTEMPTS = 20;
+    let sleepCount = 1000;
 
     const checkImages = async () => {
-      let sleepCount = 1000;
-      while (predictions.length > 0 && totalAttempts < MAX_ATTEMPTS) {
+      while (
+        predictionsRef.current.length > 0 &&
+        totalAttempts < MAX_ATTEMPTS
+      ) {
         totalAttempts++;
         console.log(
-          `Attempt ${totalAttempts}: Checking user images. Remaining predictions: ${predictions.length}`
+          `Attempt ${totalAttempts}: Checking user images. Remaining predictions: ${predictionsRef.current.length}`
         );
         console.log(`Current sleep duration: ${sleepCount}ms`);
 
         try {
-          const result = await revalidateStudioPath();
+          const { user: userData } = (await revalidateStudioPath()) as {
+            user: PlainUser;
+          };
 
-          if (!result || !result.user || !result.user.interiorImages) {
+          if (!userData || !userData.interiorImages) {
             console.log(
               "User data or interior images not available. Waiting..."
             );
@@ -156,10 +162,10 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
             continue;
           }
 
-          const userData = result.user;
-
-          const pendingImages = (userData as any).interiorImages.filter(
-            (obj: any) => obj.imageUrl === ""
+          const pendingImages = userData.interiorImages.filter(
+            (obj) =>
+              obj.imageUrl === "" &&
+              predictionsRef.current.includes(obj.imageId)
           );
 
           if (pendingImages.length > 0) {
@@ -169,28 +175,30 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
             await sleep(sleepCount);
             sleepCount = Math.min(sleepCount * 2, 30000);
           } else {
-            const processedImageIds = (userData as any).interiorImages
-              .filter((obj: any) => obj.imageUrl !== "")
-              .map((obj: any) => obj.imageId);
-
-            const initialPredictionsLength = predictions.length;
-            setPredictions((prevPredictions) =>
-              prevPredictions.filter(
-                (pred) => !processedImageIds.includes(pred)
+            const processedImageIds = userData.interiorImages
+              .filter(
+                (obj) =>
+                  obj.imageUrl !== "" &&
+                  predictionsRef.current.includes(obj.imageId)
               )
-            );
+              .map((obj) => obj.imageId);
 
-            if (predictions.length < initialPredictionsLength) {
+            if (processedImageIds.length > 0) {
+              predictionsRef.current = predictionsRef.current.filter(
+                (pred: any) => !processedImageIds.includes(pred)
+              );
+              setPredictions(predictionsRef.current);
+
               console.log(
-                `Processed ${
-                  initialPredictionsLength - predictions.length
-                } images. ${predictions.length} predictions remaining.`
+                `Processed ${processedImageIds.length} images. ${predictionsRef.current.length} predictions remaining.`
               );
               sleepCount = 1000;
               totalAttempts = 0;
               updateLoadingState(userData);
+              router.refresh();
             } else {
               console.log("No new images processed in this attempt.");
+              sleepCount = Math.min(sleepCount * 2, 30000);
             }
           }
         } catch (error) {
@@ -207,7 +215,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
 
     await checkImages();
     console.log("Polling completed");
-  }, [predictions, updateLoadingState]);
+  }, [updateLoadingState, router]);
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     if (isLoading) return;
@@ -301,18 +309,28 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
         });
         return;
       }
-      setPredictions((prev) => {
-        const newPredictions = [...prev, predictionData.interiorImageId];
-        updateLoadingState({ ...user, plan: userPlan });
-        return newPredictions;
-      });
+      let pollingTimeout: NodeJS.Timeout;
+
+      predictionsRef.current = [
+        ...predictionsRef.current,
+        predictionData.interiorImageId,
+      ];
+      setPredictions(predictionsRef.current);
+      updateLoadingState({ ...user, plan: userPlan });
       form.reset({
         ...defaultValues,
         beforeImage: form.getValues("beforeImage"),
         prompt: form.getValues("prompt"),
       });
+      pollingTimeout = setTimeout(() => {
+        polling();
+      }, 7000);
       router.refresh();
-      polling();
+      return () => {
+        if (pollingTimeout) {
+          clearTimeout(pollingTimeout);
+        }
+      };
     } catch (error: any) {
       toast({
         variant: "destructive",
