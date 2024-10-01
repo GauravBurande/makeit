@@ -15,7 +15,6 @@ import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { post } from "@/lib/api";
 import configs from "@/config";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { ScrollArea } from "./ui/scroll-area";
@@ -145,21 +144,33 @@ const ButtonCheckout: React.FC<ButtonCheckoutProps> = ({
       setIsLoading(true);
       setError(null);
       try {
-        const res: any = await post("/stripe/create-checkout", {
-          priceId,
-          mode,
-          successUrl: configs.stripe.successUrl,
-          cancelUrl: window.location.href,
+        const response = await fetch("/api/stripe/create-checkout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            priceId,
+            mode,
+            successUrl: window.location.href,
+            cancelUrl: window.location.href,
+          }),
         });
 
-        if (res.error) {
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to create checkout session");
+        }
+
+        if (data.error) {
           toast({
             title: "Error",
-            description: res.error,
+            description: data.error,
             variant: "destructive",
           });
         } else {
-          window.location.href = res.url;
+          window.location.href = data.url;
         }
       } catch (error) {
         console.error("Error creating checkout:", error);
@@ -168,6 +179,14 @@ const ButtonCheckout: React.FC<ButtonCheckoutProps> = ({
             ? error.message
             : "An unexpected error occurred"
         );
+        toast({
+          title: "Error",
+          description:
+            error instanceof Error
+              ? error.message
+              : "An unexpected error occurred",
+          variant: "destructive",
+        });
       } finally {
         setIsLoading(false);
       }

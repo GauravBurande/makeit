@@ -5,23 +5,26 @@ import { createCheckout } from "@/lib/stripe";
 import connectMongo from "@/lib/mongoose";
 import User from "@/models/User";
 
-// This function is used to create a Stripe Checkout Session (one-time payment or subscription)
-// It's called by the <ButtonCheckout /> component
-// By default, it doesn't force users to be authenticated. But if they are, it will prefill the Checkout data with their email and/or credit card
 export async function POST(req: Request) {
+  console.log("POST request received");
+
   const body = await req.json();
+  console.log("Request body:", body);
 
   if (!body.priceId) {
+    console.log("Error: Price ID is missing");
     return NextResponse.json(
       { error: "Price ID is required" },
       { status: 400 }
     );
   } else if (!body.successUrl || !body.cancelUrl) {
+    console.log("Error: Success or cancel URL is missing");
     return NextResponse.json(
       { error: "Success and cancel URLs are required" },
       { status: 400 }
     );
   } else if (!body.mode) {
+    console.log("Error: Mode is missing");
     return NextResponse.json(
       {
         error:
@@ -32,17 +35,24 @@ export async function POST(req: Request) {
   }
 
   try {
+    console.log("Attempting to get server session");
     // @ts-ignore
     const session = await getServerSession(authOptions);
+    console.log("Session:", session);
 
     if (session) {
+      console.log("User is authenticated, connecting to MongoDB");
       await connectMongo();
+      console.log("MongoDB connected");
 
+      console.log("Fetching user from database");
       // @ts-ignore
       const user = await User.findById(session?.user?.id);
+      console.log("User found:", user);
 
       const { priceId, mode, successUrl, cancelUrl } = body;
 
+      console.log("Creating Stripe checkout session");
       const stripeSessionURL = await createCheckout({
         priceId,
         mode,
@@ -57,16 +67,18 @@ export async function POST(req: Request) {
         // If you send coupons from the frontend, you can pass it here
         // couponId: body.couponId,
       });
+      console.log("Stripe session URL created:", stripeSessionURL);
 
       return NextResponse.json({ url: stripeSessionURL });
     } else {
+      console.log("Error: User not authenticated");
       return NextResponse.json(
         { error: "You must be logged in to create a checkout session" },
         { status: 401 }
       );
     }
   } catch (e) {
-    console.error(e);
+    console.error("Error in POST request:", e);
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });
   }
 }
