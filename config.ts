@@ -64,7 +64,7 @@ const configs = {
         process.env.NODE_ENV === "development"
           ? "price_1Niyy5AxyNprDp7iZIqEyD2h"
           : "price_456",
-      price: 99,
+      price: 59,
       description:
         "Brainstorm ideas quickly, impress clients with stunning visuals, and close deals faster using our professional tools.",
       features: [
@@ -87,7 +87,7 @@ const configs = {
         process.env.NODE_ENV === "development"
           ? "price_1Niyy5AxyNprDp7iZIqEyD2h"
           : "price_456",
-      price: 299,
+      price: 99,
       description:
         "Empower your firm with cutting-edge AI technology to enhance efficiency and stay competitive in the market.",
       features: [
