@@ -451,7 +451,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
   const loadPreviousImages = async () => {
     try {
       const images = await getPreviousImages();
-      setPreviousImages(images || []);
+      setPreviousImages(images?.reverse() || []);
     } catch (error) {
       console.error("Error fetching previous images:", error);
       toast({
@@ -557,26 +557,22 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
                                   </SheetHeader>
                                   {previousImages.length > 0 ? (
                                     <div className="flex flex-wrap gap-4 mt-4 max-h-[calc(100vh-8rem)] overflow-y-auto">
-                                      {previousImages
-                                        .reverse()
-                                        .map((image, index) => (
-                                          <div
-                                            key={index}
-                                            className="relative cursor-pointer w-72 h-44"
-                                            onClick={() =>
-                                              handlePreviousImageSelect(image)
-                                            }
-                                          >
-                                            <Image
-                                              src={image}
-                                              alt={`Previous upload ${
-                                                index + 1
-                                              }`}
-                                              fill
-                                              className="object-cover rounded-md"
-                                            />
-                                          </div>
-                                        ))}
+                                      {previousImages.map((image, index) => (
+                                        <div
+                                          key={index}
+                                          className="relative cursor-pointer w-72 h-44"
+                                          onClick={() =>
+                                            handlePreviousImageSelect(image)
+                                          }
+                                        >
+                                          <Image
+                                            src={image}
+                                            alt={`Previous upload ${index + 1}`}
+                                            fill
+                                            className="object-cover rounded-md"
+                                          />
+                                        </div>
+                                      ))}
                                     </div>
                                   ) : (
                                     <div className="flex items-center justify-center h-full w-full">

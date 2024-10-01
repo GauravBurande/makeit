@@ -17,7 +17,7 @@ export const env = createEnv({
     EMAIL_SERVER: z.string().min(1),
     MONGODB_URI: z.string().min(1),
     STRIPE_SECRET_KEY: z.string().min(1),
-    // STRIPE_PUBLIC_KEY: z.string().min(1), wtf do we use this for?
+    STRIPE_PUBLIC_KEY: z.string().min(1), //wtf do we use this for?
     STRIPE_WEBHOOK_SECRET: z.string().min(1),
   },
   client: {
@@ -37,7 +37,7 @@ export const env = createEnv({
     MAILGUN_API_KEY: process.env.MAILGUN_API_KEY,
     EMAIL_SERVER: process.env.EMAIL_SERVER,
     MONGODB_URI: process.env.MONGODB_URI,
-    // STRIPE_PUBLIC_KEY: process.env.STRIPE_PUBLIC_KEY,
+    STRIPE_PUBLIC_KEY: process.env.STRIPE_PUBLIC_KEY,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
   },
