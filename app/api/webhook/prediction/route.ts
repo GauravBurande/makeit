@@ -9,6 +9,8 @@ import User from "@/models/User";
 import InteriorImage from "@/models/InteriorImage";
 import connectMongo from "@/lib/mongoose";
 import configs from "@/config";
+import crypto from "crypto";
+import { env } from "@/env";
 
 // convert Buffer to File
 function bufferToFile(
@@ -19,9 +21,51 @@ function bufferToFile(
   return new File([buffer], filename, { type: mimetype });
 }
 
+const TOLERANCE = 5 * 60; // 5 minutes tolerance for timestamp verification
+const WEBHOOK_SECRET = env.REPLICATE_WEBHOOK_SECRET;
+async function verifyWebhook(req: Request) {
+  const body = await req.text();
+  const webhookId = req.headers.get("webhook-id");
+  const webhookTimestamp = req.headers.get("webhook-timestamp");
+  const webhookSignature = req.headers.get("webhook-signature");
+
+  if (!webhookId || !webhookTimestamp || !webhookSignature) {
+    throw new Error("Missing required webhook headers");
+  }
+
+  // Verify timestamp
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+  if (Math.abs(currentTimestamp - parseInt(webhookTimestamp)) > TOLERANCE) {
+    throw new Error("Webhook timestamp is outside of the tolerance window");
+  }
+
+  // Construct signed content
+  const signedContent = `${webhookId}.${webhookTimestamp}.${body}`;
+
+  const secretBytes = Buffer.from(WEBHOOK_SECRET.split("_")[1], "base64");
+  const expectedSignature = crypto
+    .createHmac("sha256", secretBytes)
+    .update(signedContent)
+    .digest("base64");
+
+  // Compare signatures
+  const receivedSignatures = webhookSignature
+    .split(" ")
+    .map((sig) => sig.split(",")[1]);
+  const isValid = receivedSignatures.some((sig) => sig === expectedSignature);
+
+  if (!isValid) {
+    throw new Error("Invalid webhook signature");
+  }
+
+  return JSON.parse(body);
+}
+
 export async function POST(req: Request) {
   try {
     console.log("Request received from:", req.headers.get("User-Agent"));
+    const verifiedPayload = await verifyWebhook(req);
+    console.log("Verified webhook payload:", verifiedPayload);
 
     const body = await req.json();
     console.log("Prediction body:", body);
@@ -38,8 +82,6 @@ export async function POST(req: Request) {
     }
 
     if (body.status === "succeeded") {
-      // Process successful prediction
-      // Get the prediction result
       const imageUrl = body.output;
 
       const imageResponse = await fetch(imageUrl);
