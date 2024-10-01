@@ -1,6 +1,6 @@
 // todo: receive the prediction result and process
 //     8. firt make sure the request is from replicate secure this webhook endpoint, but how? let's see
-//     9.[IMPORTANT] after done with basic image generation send the image then to the clarity upscaler
+//     9.[IMPORTANT] after done with basic image generation send the image then to the clarity upscaler if needed
 
 import { NextResponse } from "next/server";
 import sharp from "sharp";

@@ -26,7 +26,6 @@ const configs = {
   colors: {
     main: "#E39C4E",
   },
-  // todo: change the pricing later with stripe, etc...
   pricing: [
     {
       name: "Personal",

@@ -182,9 +182,6 @@ export async function POST(req: Request) {
         await session.commitTransaction();
       }
 
-      // todo: if image gallery doesn't update on prod uncomment this
-      // revalidatePath("/studio");
-
       return new Response(JSON.stringify(prediction), { status: 201 });
     } else {
       return new Response(JSON.stringify({ error: "You must be logged in!" }), {
