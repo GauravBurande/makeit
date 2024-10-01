@@ -1,15 +1,16 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+// import { revalidatePath } from "next/cache";
 import { getBeforeImages, getUser } from "./db";
 
-export async function revalidateStudioPath() {
+export async function getUserForPolling() {
   console.log("revalidating studio path");
   try {
-    revalidatePath("/studio");
+    // revalidatePath("/studio");
     const user = await getUser();
     if (!user) {
-      revalidatePath("/signin");
+      // revalidatePath("/signin");
+      return { user: null };
     }
     return { user };
   } catch (error) {

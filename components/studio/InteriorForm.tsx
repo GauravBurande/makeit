@@ -27,7 +27,7 @@ import { PlainUser } from "@/helpers/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { sleep } from "@/helpers/utils";
-import { getPreviousImages, revalidateStudioPath } from "@/lib/actions";
+import { getPreviousImages, getUserForPolling } from "@/lib/actions";
 import {
   Sheet,
   SheetClose,
@@ -149,7 +149,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
         console.log(`Current sleep duration: ${sleepCount}ms`);
 
         try {
-          const { user: userData } = (await revalidateStudioPath()) as {
+          const { user: userData } = (await getUserForPolling()) as {
             user: PlainUser;
           };
 
