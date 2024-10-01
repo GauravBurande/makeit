@@ -23,8 +23,8 @@ function bufferToFile(
 
 const TOLERANCE = 5 * 60; // 5 minutes tolerance for timestamp verification
 const WEBHOOK_SECRET = env.REPLICATE_WEBHOOK_SECRET;
-async function verifyWebhook(req: Request) {
-  const body = await req.text();
+async function verifyWebhook(req: Request, body: string) {
+  console.log("Verifying webhook...");
   const webhookId = req.headers.get("webhook-id");
   const webhookTimestamp = req.headers.get("webhook-timestamp");
   const webhookSignature = req.headers.get("webhook-signature");
@@ -63,11 +63,13 @@ async function verifyWebhook(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    console.log("Request received from:", req.headers.get("User-Agent"));
-    const verifiedPayload = await verifyWebhook(req);
+    const bodyText = await req.text();
+    console.log("Raw body:", bodyText);
+    const verifiedPayload = await verifyWebhook(req, bodyText);
     console.log("Verified webhook payload:", verifiedPayload);
 
-    const body = await req.json();
+    // Use the verified payload for further processing
+    const body = verifiedPayload;
     console.log("Prediction body:", body);
 
     await connectMongo();
