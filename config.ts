@@ -41,7 +41,7 @@ const configs = {
       yearlyPriceId:
         process.env.NODE_ENV === "development"
           ? "price_1Niyy5AxyNprDp7iZIqEyD2h"
-          : "price_456",
+          : "price_1Niyy5AxyNprDp7iZIqEyD2h",
       price: 29,
       description:
         "Discover your inner designer and create your dream home with our cost-effective, user-friendly software.",
@@ -58,8 +58,8 @@ const configs = {
       name: "Pro",
       priceId:
         process.env.NODE_ENV === "development"
-          ? "price_1Niyy5AxyNprDp7iZIqEyD2h"
-          : "price_456",
+          ? "price_1Q51BQDNglLxTGmddR9eTo3t"
+          : "price_1Q51BQDNglLxTGmddR9eTo3t",
       yearlyPriceId:
         process.env.NODE_ENV === "development"
           ? "price_1Niyy5AxyNprDp7iZIqEyD2h"
