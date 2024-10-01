@@ -116,7 +116,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
 
   const PredictionLimits: any = {
     Personal: 4,
-    Pro: 2, //todo: change to 8, 2 is just for testing
+    Pro: 8, // keep it to 8, 2 is just for testing
     Premium: 16,
   };
 
