@@ -485,96 +485,107 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
                       onPaste={handlePaste}
                     >
                       {!preview ? (
-                        <>
-                          <div className="relative">
-                            <Input
-                              type="text"
-                              readOnly={preview === null ? false : true}
-                              placeholder="Enter a URL, paste a file, or drag a file over."
-                              className="mb-2"
-                              {...field}
-                              onChange={(e) => {
-                                field.onChange(e);
-                                if (
-                                  e.target.value.startsWith("https://") &&
-                                  /\.(png|jpg|jpeg|webp)$/i.test(e.target.value)
-                                ) {
-                                  setPreview(e.target.value);
-                                }
-                              }}
-                            />
+                        uploading ? (
+                          <div className="flex items-center justify-center">
+                            <Loader className="h-8 w-8 animate-spin" />
+                            <span className="ml-2">Uploading...</span>
                           </div>
-                          <div className="flex items-center justify-center gap-4">
-                            <label
-                              htmlFor="file-upload-beforeImage"
-                              className={cn(
-                                buttonVariants({
-                                  variant: "outline",
-                                  size: "xs",
-                                }),
-                                "text-foreground/60 cursor-pointer"
-                              )}
-                            >
-                              <UploadCloud className="w-5 h-5" />
-                              <span>Upload the image</span>
-                            </label>
-                            <input
-                              id="file-upload-beforeImage"
-                              type="file"
-                              accept="image/png, image/jpeg, image/jpg, image/webp"
-                              onChange={handleChange}
-                              className="hidden"
-                            />
-                            <Sheet
-                              open={isSheetOpen}
-                              onOpenChange={setIsSheetOpen}
-                            >
-                              <SheetTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="xs"
-                                  onClick={loadPreviousImages}
-                                  className="flex items-center text-foreground/60 gap-2"
-                                >
-                                  <ImageIcon className="w-4 h-4" />
-                                  <span>Previous Uploads</span>
-                                </Button>
-                              </SheetTrigger>
-                              <SheetContent
-                                side="right"
-                                className="w-[80vw] sm:w-[80vw]"
-                              >
-                                <SheetHeader>
-                                  <SheetTitle>Previous Uploads</SheetTitle>
-                                </SheetHeader>
-                                {previousImages.length > 0 ? (
-                                  <div className="flex flex-wrap gap-4 mt-4 max-h-[calc(100vh-8rem)] overflow-y-auto">
-                                    {previousImages.map((image, index) => (
-                                      <div
-                                        key={index}
-                                        className="relative cursor-pointer w-72 h-44"
-                                        onClick={() =>
-                                          handlePreviousImageSelect(image)
-                                        }
-                                      >
-                                        <Image
-                                          src={image}
-                                          alt={`Previous upload ${index + 1}`}
-                                          fill
-                                          className="object-cover rounded-md"
-                                        />
-                                      </div>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <div className="flex items-center justify-center h-full w-full">
-                                    <SheetClose>No previous uploads</SheetClose>
-                                  </div>
+                        ) : (
+                          <>
+                            <div className="relative">
+                              <Input
+                                type="text"
+                                readOnly={preview === null ? false : true}
+                                placeholder="Enter a URL, paste a file, or drag a file over."
+                                className="mb-2"
+                                {...field}
+                                onChange={(e) => {
+                                  field.onChange(e);
+                                  if (
+                                    e.target.value.startsWith("https://") &&
+                                    /\.(png|jpg|jpeg|webp)$/i.test(
+                                      e.target.value
+                                    )
+                                  ) {
+                                    setPreview(e.target.value);
+                                  }
+                                }}
+                              />
+                            </div>
+                            <div className="flex items-center justify-center gap-4">
+                              <label
+                                htmlFor="file-upload-beforeImage"
+                                className={cn(
+                                  buttonVariants({
+                                    variant: "outline",
+                                    size: "xs",
+                                  }),
+                                  "text-foreground/60 cursor-pointer"
                                 )}
-                              </SheetContent>
-                            </Sheet>
-                          </div>
-                        </>
+                              >
+                                <UploadCloud className="w-5 h-5" />
+                                <span>Upload the image</span>
+                              </label>
+                              <input
+                                id="file-upload-beforeImage"
+                                type="file"
+                                accept="image/png, image/jpeg, image/jpg, image/webp"
+                                onChange={handleChange}
+                                className="hidden"
+                              />
+                              <Sheet
+                                open={isSheetOpen}
+                                onOpenChange={setIsSheetOpen}
+                              >
+                                <SheetTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="xs"
+                                    onClick={loadPreviousImages}
+                                    className="flex items-center text-foreground/60 gap-2"
+                                  >
+                                    <ImageIcon className="w-4 h-4" />
+                                    <span>Previous Uploads</span>
+                                  </Button>
+                                </SheetTrigger>
+                                <SheetContent
+                                  side="right"
+                                  className="w-[80vw] sm:w-[80vw]"
+                                >
+                                  <SheetHeader>
+                                    <SheetTitle>Previous Uploads</SheetTitle>
+                                  </SheetHeader>
+                                  {previousImages.length > 0 ? (
+                                    <div className="flex flex-wrap gap-4 mt-4 max-h-[calc(100vh-8rem)] overflow-y-auto">
+                                      {previousImages.map((image, index) => (
+                                        <div
+                                          key={index}
+                                          className="relative cursor-pointer w-72 h-44"
+                                          onClick={() =>
+                                            handlePreviousImageSelect(image)
+                                          }
+                                        >
+                                          <Image
+                                            src={image}
+                                            alt={`Previous upload ${index + 1}`}
+                                            fill
+                                            className="object-cover rounded-md"
+                                          />
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center justify-center h-full w-full">
+                                      <SheetClose>
+                                        No previous uploads
+                                      </SheetClose>
+                                    </div>
+                                  )}
+                                </SheetContent>
+                              </Sheet>
+                            </div>
+                          </>
+                        )
                       ) : (
                         <div className="relative">
                           <Image
@@ -594,12 +605,6 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
                             <Trash className="h-4 w-4" />
                             <span className="text-xs">clear input</span>
                           </Button>
-                        </div>
-                      )}
-                      {uploading && (
-                        <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-                          <Loader className="h-8 w-8 animate-spin" />
-                          <span className="ml-2">Uploading...</span>
                         </div>
                       )}
                     </div>
