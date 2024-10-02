@@ -99,14 +99,14 @@ export const createCheckout = async ({
     const zeroPrice = await stripe.prices.create({
       unit_amount: 0,
       currency: subscription.currency,
-      recurring: { interval: "month" },
+      recurring: { interval: "day" }, //todo: change to monthly, day is for testing
       product: subscription.items.data[0].price.product as string,
     });
 
     /// Create a subscription schedule for monthly $0 invoices
     await stripe.subscriptionSchedules.create({
       customer: subscription.customer as string,
-      start_date: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60, // Start 30 days from now
+      start_date: Math.floor(Date.now() / 1000) + 1 * 24 * 60 * 60, // Start 30 days from now, todo: but set to 1 to test for day
       end_behavior: "release",
       phases: [
         {
