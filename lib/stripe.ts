@@ -51,9 +51,10 @@ export const createCheckout = async ({
   if (isYearly && mode === "subscription") {
     // Create a subscription schedule for yearly subscriptions with monthly billing
     const now = Math.floor(Date.now() / 1000);
+    const tenMinutesLater = now + 10 * 60; // Add 10 minutes
 
     subscriptionData = {
-      billing_cycle_anchor: now,
+      billing_cycle_anchor: tenMinutesLater,
       proration_behavior: "none",
     };
 
