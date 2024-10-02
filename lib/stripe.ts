@@ -51,10 +51,8 @@ export const createCheckout = async ({
   if (isYearly && mode === "subscription") {
     // Create a subscription schedule for yearly subscriptions with monthly billing
     const now = Math.floor(Date.now() / 1000);
-    const oneYearFromNow = now + 365 * 24 * 60 * 60;
 
     subscriptionData = {
-      trial_end: now,
       billing_cycle_anchor: now,
       proration_behavior: "none",
     };
@@ -94,27 +92,32 @@ export const createCheckout = async ({
         ? stripeSession.subscription
         : stripeSession.subscription.id;
 
-    const subscriptionSchedule = await stripe.subscriptionSchedules.create({
-      from_subscription: subscriptionId,
+    // Retrieve the subscription to get its details
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+
+    // Create a $0 price for monthly invoices
+    const zeroPrice = await stripe.prices.create({
+      unit_amount: 0,
+      currency: subscription.currency,
+      recurring: { interval: "month" },
+      product: subscription.items.data[0].price.product as string,
     });
 
-    // Update the subscription schedule to bill monthly
-    await stripe.subscriptionSchedules.update(subscriptionSchedule.id, {
+    /// Create a subscription schedule for monthly $0 invoices
+    await stripe.subscriptionSchedules.create({
+      customer: subscription.customer as string,
+      start_date: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60, // Start 30 days from now
+      end_behavior: "release",
       phases: [
         {
-          start_date: "now",
-          end_date: Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60,
           items: [
             {
-              price: priceId,
+              price: zeroPrice.id,
               quantity: 1,
             },
           ],
-          billing_cycle_anchor: "phase_start",
-          billing_thresholds: null,
+          iterations: 11, // 11 monthly $0 invoices (12th month is covered by the initial charge)
           proration_behavior: "none",
-          collection_method: "charge_automatically",
-          iterations: 12, // Bill 12 times over the year
         },
       ],
     });

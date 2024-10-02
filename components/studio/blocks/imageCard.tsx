@@ -22,6 +22,7 @@ const ImageCard = ({ image, onClose }: ImageCardProps) => {
     const fetchImageInfo = async () => {
       try {
         const info = await getImageInfo(image.imageId);
+        console.log(info);
         setImageInfo(info as IInteriorImage);
       } catch (error) {
         console.error("Error fetching image info:", error);
