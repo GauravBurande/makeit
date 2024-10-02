@@ -6,6 +6,8 @@ export interface ISubscription extends Document {
   stripeSubscriptionId: string;
   customerId: string;
   plan: string;
+  planInterval?: string;
+  nextResetDate?: Date;
   priceId: string;
   status: string;
   currentPeriodStart: Date;
@@ -42,6 +44,13 @@ const subscriptionSchema = new Schema<ISubscription>(
       type: String,
       enum: ["Personal", "Pro", "Premium"],
       required: true,
+    },
+    planInterval: {
+      type: String,
+      enum: ["month", "year"],
+    },
+    nextResetDate: {
+      type: Date,
     },
     priceId: {
       type: String,

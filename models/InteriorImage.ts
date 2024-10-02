@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 import toJSON from "./plugins/toJSON";
-import { colors, materials, roomTypes, styles } from "@/helpers/constants";
 
 export interface IInteriorImage extends Document {
   userId: mongoose.Schema.Types.ObjectId; // Reference to the User model

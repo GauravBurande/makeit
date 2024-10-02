@@ -104,6 +104,19 @@ async function handleCheckoutSessionCompleted(
 
   const { imageLimit, storageLimit } = planLimits[plan];
 
+  // Determine the plan interval
+  const planInterval =
+    subscription.items.data[0].plan.interval === "year" ? "year" : "month";
+
+  // Calculate the next reset date
+  const currentPeriodStart = new Date(subscription.current_period_start * 1000);
+  let nextResetDate = undefined;
+
+  if (planInterval === "year") {
+    nextResetDate = new Date(currentPeriodStart);
+    nextResetDate.setFullYear(nextResetDate.getFullYear() + 1);
+  }
+
   const newSubscription = await Subscription.create({
     userId,
     stripeSubscriptionId: subscriptionId,
@@ -111,9 +124,11 @@ async function handleCheckoutSessionCompleted(
     plan,
     priceId,
     status: subscription.status,
-    currentPeriodStart: new Date(subscription.current_period_start * 1000),
+    currentPeriodStart,
     currentPeriodEnd: new Date(subscription.current_period_end * 1000),
     cancelAtPeriodEnd: subscription.cancel_at_period_end,
+    planInterval,
+    nextResetDate,
   });
 
   await User.findByIdAndUpdate(

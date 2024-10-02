@@ -42,13 +42,14 @@ export async function POST(req: Request) {
       const user = await User.findById(session?.user?.id);
       console.log("User found:", user);
 
-      const { priceId, mode, successUrl, cancelUrl } = body;
+      const { priceId, mode, successUrl, cancelUrl, isYearly } = body;
 
       const stripeSessionURL = await createCheckout({
         priceId,
         mode,
         successUrl,
         cancelUrl,
+        isYearly,
         // If user is logged in, it will pass the user ID to the Stripe Session so it can be retrieved in the webhook later
         // so the user is always logged in
         clientReferenceId: user?._id?.toString(),

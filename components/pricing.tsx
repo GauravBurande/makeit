@@ -115,6 +115,7 @@ const PricingCard: React.FC<{
       <ButtonCheckout
         checkout={checkout}
         popular={plan.popular}
+        isYearly={isYearly}
         priceId={isYearly ? plan.yearlyPriceId : plan.priceId}
       />
     </CardFooter>
@@ -125,10 +126,12 @@ interface ButtonCheckoutProps {
   checkout: boolean;
   popular: boolean | undefined;
   priceId: string;
+  isYearly: boolean;
   mode?: "payment" | "subscription";
 }
 
 const ButtonCheckout: React.FC<ButtonCheckoutProps> = ({
+  isYearly,
   checkout = false,
   popular = false,
   priceId,
@@ -152,6 +155,7 @@ const ButtonCheckout: React.FC<ButtonCheckoutProps> = ({
           body: JSON.stringify({
             priceId,
             mode,
+            isYearly,
             successUrl: window.location.href,
             cancelUrl: window.location.href,
           }),

@@ -1,6 +1,8 @@
 ## TODO list:
 
 - IMPORTANT: change logo and branding on stripe account
+- also how to reset monthly usage limits when user purchases yearly plan?(not so important now), a daily cron job!
+- add customer support for pro and premium usrs
 - how to handle monthly limits when user buys yearly plan, cauz maybe if no invoice.paid monthly events ig,
 - email user's when abandoned cart (does stripe does that itself or will it need it's own cron job?)
 - have transactional and marketing emails flow

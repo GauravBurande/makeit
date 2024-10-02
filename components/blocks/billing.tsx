@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { formatDate } from "@/helpers/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ import {
   CheckCircle,
   Clock,
   CreditCard,
+  Loader,
 } from "lucide-react";
 
 interface BillingProps {
@@ -34,8 +36,10 @@ interface BillingProps {
 
 export const BillingSection = ({ user, billing }: BillingProps) => {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleBilling = async () => {
+    setIsLoading(true);
     try {
       if (user.hasAccess) {
         const response = await fetch("/api/stripe/create-portal", {
@@ -55,7 +59,11 @@ export const BillingSection = ({ user, billing }: BillingProps) => {
       } else {
         router.push("/studio#upgrade");
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error("Error handling billing:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getStatusColor = (status: string): string => {
@@ -155,12 +163,19 @@ export const BillingSection = ({ user, billing }: BillingProps) => {
         )}
       </CardContent>
       <CardFooter>
-        <Button onClick={handleBilling} className="w-full">
-          {billing?.endedAt
-            ? "Renew Subscription"
-            : billing?.cancelAtPeriodEnd
-            ? "Resume Subscription"
-            : "Manage Subscription"}
+        <Button onClick={handleBilling} className="w-full" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader className="mr-2 h-4 w-4 animate-spin" />
+              Processing...
+            </>
+          ) : billing?.endedAt ? (
+            "Renew Subscription"
+          ) : billing?.cancelAtPeriodEnd ? (
+            "Resume Subscription"
+          ) : (
+            "Manage Subscription"
+          )}
         </Button>
       </CardFooter>
     </Card>

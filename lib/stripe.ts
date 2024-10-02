@@ -6,6 +6,7 @@ interface CreateCheckoutParams {
   mode: Stripe.Checkout.SessionCreateParams.Mode;
   successUrl: string;
   cancelUrl: string;
+  isYearly: boolean;
   couponId?: string;
   clientReferenceId?: string;
   user?: {
@@ -19,6 +20,7 @@ export const createCheckout = async ({
   mode,
   successUrl,
   cancelUrl,
+  isYearly,
   couponId,
   clientReferenceId,
   user,
@@ -42,6 +44,27 @@ export const createCheckout = async ({
     extraParams.tax_id_collection = { enabled: true };
   }
 
+  let subscriptionData:
+    | Stripe.Checkout.SessionCreateParams.SubscriptionData
+    | undefined;
+
+  if (isYearly && mode === "subscription") {
+    // Create a subscription schedule for yearly subscriptions with monthly billing
+    const now = Math.floor(Date.now() / 1000);
+    const oneYearFromNow = now + 365 * 24 * 60 * 60;
+
+    subscriptionData = {
+      trial_end: now,
+      billing_cycle_anchor: now,
+      proration_behavior: "none",
+    };
+
+    extraParams.subscription_data = subscriptionData;
+
+    // After checkout, we'll create a subscription schedule
+    extraParams.expand = ["subscription"];
+  }
+
   const stripeSession = await stripe.checkout.sessions.create({
     mode,
     allow_promotion_codes: true,
@@ -63,6 +86,39 @@ export const createCheckout = async ({
     cancel_url: cancelUrl,
     ...extraParams,
   });
+
+  if (isYearly && mode === "subscription" && stripeSession.subscription) {
+    // Create a subscription schedule for the yearly subscription
+    const subscriptionId =
+      typeof stripeSession.subscription === "string"
+        ? stripeSession.subscription
+        : stripeSession.subscription.id;
+
+    const subscriptionSchedule = await stripe.subscriptionSchedules.create({
+      from_subscription: subscriptionId,
+    });
+
+    // Update the subscription schedule to bill monthly
+    await stripe.subscriptionSchedules.update(subscriptionSchedule.id, {
+      phases: [
+        {
+          start_date: "now",
+          end_date: Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60,
+          items: [
+            {
+              price: priceId,
+              quantity: 1,
+            },
+          ],
+          billing_cycle_anchor: "phase_start",
+          billing_thresholds: null,
+          proration_behavior: "none",
+          collection_method: "charge_automatically",
+          iterations: 12, // Bill 12 times over the year
+        },
+      ],
+    });
+  }
 
   return stripeSession.url;
 };

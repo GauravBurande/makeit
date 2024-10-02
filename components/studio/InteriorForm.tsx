@@ -27,7 +27,7 @@ import { PlainUser } from "@/helpers/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { sleep } from "@/helpers/utils";
-import { getPreviousImages, getUserForPolling } from "@/lib/actions";
+import { getPreviousImages, getUserForPolling } from "@/app/actions";
 import {
   Sheet,
   SheetClose,
