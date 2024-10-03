@@ -2,6 +2,7 @@
 
 import { getBeforeImages, getUser } from "@/lib/db";
 import connectMongo from "@/lib/mongoose";
+import { getDownloadUrl } from "@/lib/r2";
 import InteriorImage from "@/models/InteriorImage";
 
 export async function getUserForPolling() {
@@ -40,5 +41,15 @@ export async function getImageInfo(imageId: string) {
     return plainImageInfo;
   } catch (error) {
     console.error(error);
+  }
+}
+
+export async function getImageDownloadUrl(objectName: string) {
+  try {
+    const url = await getDownloadUrl(objectName);
+    return { url };
+  } catch (error) {
+    console.error("Error getting download URL:", error);
+    return { error: "Failed to get download URL" };
   }
 }
