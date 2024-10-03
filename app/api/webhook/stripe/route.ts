@@ -66,6 +66,11 @@ export async function POST(req: Request) {
         await handleSubscriptionDeleted(subscription);
         break;
       }
+      case "customer.subscription.updated": {
+        const subscription = event.data.object as Stripe.Subscription;
+        await handleSubscriptionUpdated(subscription);
+        break;
+      }
       // Add other event types as needed
     }
   } catch (err) {
@@ -237,5 +242,29 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 
   console.log(
     `Subscription ${subscriptionId} has been canceled for user ${user._id}`
+  );
+}
+
+async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
+  const subscriptionId = subscription.id;
+
+  const updatedSubscription = await Subscription.findOneAndUpdate(
+    { stripeSubscriptionId: subscriptionId },
+    {
+      status: subscription.status,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+    },
+    { new: true }
+  );
+
+  if (!updatedSubscription) {
+    throw new Error(
+      `No subscription found for subscription ID: ${subscriptionId}`
+    );
+  }
+
+  console.log(
+    `Subscription ${subscriptionId} for user ${updatedSubscription.userId} will be canceled at the end of the billing period`
   );
 }
