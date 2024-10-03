@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useId } from "react";
 import Image from "next/image";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PlainUser } from "@/helpers/types";
 import { Loader, Expand } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import ImageCard from "./blocks/imageCard";
 
 interface ImageGalleryProps {
@@ -13,6 +14,7 @@ interface ImageGalleryProps {
 
 const ImageGallery = ({ user }: ImageGalleryProps) => {
   const [expandedImage, setExpandedImage] = useState<any>(null);
+  const id = useId();
 
   const images = (user?.interiorImages || []).map(({ imageUrl, imageId }) => ({
     imageUrl,
@@ -21,12 +23,24 @@ const ImageGallery = ({ user }: ImageGalleryProps) => {
 
   return (
     <ScrollArea className="h-full">
+      <AnimatePresence>
+        {expandedImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/20 h-full w-full z-10"
+          />
+        )}
+      </AnimatePresence>
       {images?.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
           {images.reverse().map((img, index) => (
-            <div
-              key={index}
-              className="relative aspect-video bg-foreground/10 rounded-lg overflow-hidden group"
+            <motion.div
+              key={img.imageId}
+              layoutId={`card-${img.imageId}-${id}`}
+              onClick={() => setExpandedImage(img)}
+              className="relative aspect-video bg-foreground/10 rounded-lg overflow-hidden group cursor-pointer"
             >
               {img.imageUrl === "" ? (
                 <div className="w-full h-full flex flex-col items-center justify-center text-accent">
@@ -36,25 +50,24 @@ const ImageGallery = ({ user }: ImageGalleryProps) => {
                 </div>
               ) : (
                 <>
-                  <Image
-                    src={img.imageUrl}
-                    alt={`Design ${index + 1}`}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    style={{ objectFit: "cover" }}
-                    className="rounded-lg border"
-                  />
+                  <motion.div layoutId={`image-${img.imageId}-${id}`}>
+                    <Image
+                      src={img.imageUrl}
+                      alt={`Design ${index + 1}`}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      style={{ objectFit: "cover" }}
+                      className="rounded-lg border"
+                    />
+                  </motion.div>
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => setExpandedImage(img)}
-                      className="p-2 bg-background/80 rounded-full shadow-md hover:bg-background transition-colors"
-                    >
+                    <button className="p-2 bg-background/80 rounded-full shadow-md hover:bg-background transition-colors">
                       <Expand className="w-6 h-6 text-foreground/70" />
                     </button>
                   </div>
                 </>
               )}
-            </div>
+            </motion.div>
           ))}
         </div>
       ) : (
@@ -65,12 +78,15 @@ const ImageGallery = ({ user }: ImageGalleryProps) => {
           </p>
         </div>
       )}
-      {expandedImage && (
-        <ImageCard
-          image={expandedImage}
-          onClose={() => setExpandedImage(null)}
-        />
-      )}
+      <AnimatePresence>
+        {expandedImage && (
+          <ImageCard
+            image={expandedImage}
+            onClose={() => setExpandedImage(null)}
+            id={id}
+          />
+        )}
+      </AnimatePresence>
     </ScrollArea>
   );
 };

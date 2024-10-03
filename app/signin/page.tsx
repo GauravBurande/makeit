@@ -27,7 +27,7 @@ export default function AuthenticationPage() {
           </Button>
         </Link>
         <div className="relative hidden h-full flex-col bg-muted p-10 text-foreground dark:border-r lg:flex">
-          <div className="absolute z-10 inset-0 bg-[url(/designs/9.png)] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
+          <div className="absolute z-10 inset-0 bg-[url(/designs/1.png)] bg-center [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0))]"></div>
           <div className="absolute inset-0 bg-background/20" />
           <div className="relative z-20 flex items-center text-lg font-medium">
             <div className="flex lg:flex-1">

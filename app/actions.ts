@@ -4,15 +4,11 @@ import { getBeforeImages, getUser } from "@/lib/db";
 import connectMongo from "@/lib/mongoose";
 import InteriorImage from "@/models/InteriorImage";
 
-// import { revalidatePath } from "next/cache";
-
 export async function getUserForPolling() {
   console.log("revalidating studio path");
   try {
-    // revalidatePath("/studio");
     const user = await getUser();
     if (!user) {
-      // revalidatePath("/signin");
       return { user: null };
     }
     return { user };
@@ -36,11 +32,12 @@ export async function getPreviousImages() {
 export async function getImageInfo(imageId: string) {
   try {
     await connectMongo();
-    const imageInfo = await InteriorImage.findOne({ imageId });
+    const imageInfo = await InteriorImage.findOne({ _id: imageId });
+    const plainImageInfo = await JSON.parse(JSON.stringify(imageInfo));
     if (!imageInfo) {
       return null;
     }
-    return imageInfo;
+    return plainImageInfo;
   } catch (error) {
     console.error(error);
   }

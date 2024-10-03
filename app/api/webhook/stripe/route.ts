@@ -114,7 +114,7 @@ async function handleCheckoutSessionCompleted(
 
   if (planInterval === "year") {
     nextResetDate = new Date(currentPeriodStart);
-    nextResetDate.setFullYear(nextResetDate.getFullYear() + 1);
+    nextResetDate.setMonth(nextResetDate.getMonth() + 1);
   }
 
   const newSubscription = await Subscription.create({
