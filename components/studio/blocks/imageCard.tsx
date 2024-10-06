@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { X, Maximize2 } from "lucide-react";
+import { X, Maximize2, Loader } from "lucide-react";
 import BeforeAfterSlider from "@/components/ui/beforeAfter";
 import { getImageInfo } from "@/app/actions";
 import { IInteriorImage } from "@/models/InteriorImage";
@@ -77,7 +77,7 @@ const ImageCard = ({ image, onClose, id }: ImageCardProps) => {
         </div>
         {loading ? (
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-foreground/90"></div>
+            <Loader className="w-8 h-8 animate-spin" />
           </div>
         ) : (
           <>
