@@ -126,7 +126,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
       const limit = PredictionLimits[userPlan] || PredictionLimits.Personal;
       setIsLoading(predictions.length >= limit);
     },
-    [predictions]
+    [predictions, PredictionLimits]
   );
 
   const polling = useCallback(async () => {
