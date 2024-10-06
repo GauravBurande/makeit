@@ -7,7 +7,6 @@ import { PlainUser } from "@/helpers/types";
 import { Loader, Expand, Download } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import ImageCard from "./blocks/imageCard";
-import { getImageDownloadUrl } from "@/app/actions";
 
 interface ImageGalleryProps {
   user: PlainUser;
@@ -22,45 +21,18 @@ const ImageGallery = ({ user }: ImageGalleryProps) => {
     imageId,
   }));
 
-  const handleDownload = async (objectName: string) => {
+  const handleDownload = (imageUrl: string, imageName: string) => async () => {
     try {
-      const { url, error } = await getImageDownloadUrl(objectName);
-
-      if (error) {
-        throw new Error(error);
-      }
-
-      if (!url) {
-        throw new Error("Download URL is missing");
-      }
-
-      // Fetch the image data
-      const response = await fetch(url, {
-        method: "GET",
-        mode: "cors", // Ensure CORS mode is set
-        credentials: "same-origin", // Or 'include' if the R2 bucket is on a different domain
-      });
-
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-
-      // Get the blob from the response
+      const response = await fetch(imageUrl);
       const blob = await response.blob();
-
-      // Create a temporary URL for the blob
-      const blobUrl = window.URL.createObjectURL(blob);
-
-      // Create a temporary anchor element
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = `image-${objectName.split("/").pop()}`; // Use the last part of the objectName as the filename
+      link.href = url;
+      link.download = imageName;
       document.body.appendChild(link);
       link.click();
-
-      // Clean up
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Error downloading image:", error);
       // You might want to show an error message to the user here
@@ -113,12 +85,10 @@ const ImageGallery = ({ user }: ImageGalleryProps) => {
                       <Expand className="w-6 h-6 text-foreground/70" />
                     </button>
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDownload(
-                          img.imageUrl.replace("https://cdn.makeit.ai/", "")
-                        );
-                      }}
+                      onClick={handleDownload(
+                        img.imageUrl,
+                        `design_${index + 1}.jpg`
+                      )}
                       className="p-2 bg-background/80 rounded-full shadow-md hover:bg-background transition-colors"
                     >
                       <Download className="w-6 h-6 text-foreground/70" />
