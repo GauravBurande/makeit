@@ -1,10 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-
 import {
   Form,
   FormField,
@@ -37,31 +33,19 @@ import {
   SheetTrigger,
 } from "../ui/sheet";
 import { cn } from "@/lib/utils";
-
-const FormSchema = z.object({
-  beforeImage: z
-    .string()
-    .refine(
-      (val) =>
-        val.startsWith("data:image") ||
-        val.startsWith("blob") ||
-        val.startsWith("http"),
-      {
-        message: "Please provide a valid image input",
-      }
-    ),
-  prompt: z.string().min(10).max(3900),
-  negativePrompt: z.string().max(3900).optional(),
-  style: z.string().optional(),
-  roomType: z.string().optional(),
-  color: z.string().optional(),
-  material: z.string().optional(),
-});
+import { FormType, TFormSchema } from "@/app/(private)/studio/page";
 
 interface interiorFormProps {
   user: PlainUser;
+  form: FormType;
+  defaultValues: TFormSchema;
 }
-export function InteriorDesignForm({ user }: interiorFormProps) {
+
+export function InteriorDesignForm({
+  user,
+  form,
+  defaultValues,
+}: interiorFormProps) {
   const predictionsRef = useRef<any>([]);
 
   const [dragActive, setDragActive] = useState(false);
@@ -74,22 +58,6 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
 
   const { toast } = useToast();
   const router = useRouter();
-
-  const defaultValues = {
-    beforeImage: "",
-    prompt: "",
-    negativePrompt:
-      "lowres, watermark, banner, logo, contactinfo, text, deformed, blurry, blur, out of focus, out of frame, surreal, extra, ugly, upholstered walls, fabric walls, plush walls, mirror, mirrored, functional, realistic, illustration, distorted, horror",
-    style: "",
-    roomType: "",
-    color: "",
-    material: "",
-  };
-
-  const form = useForm({
-    resolver: zodResolver(FormSchema),
-    defaultValues,
-  });
 
   const LOCALSTORAGE_FORM_KEY = "interiorDesignFormData";
 
@@ -217,7 +185,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
     console.log("Polling completed");
   }, [updateLoadingState, router]);
 
-  const onSubmit = async (data: z.infer<typeof FormSchema>) => {
+  const onSubmit = async (data: TFormSchema) => {
     if (isLoading) return;
 
     const errorToast = (message: string) => {

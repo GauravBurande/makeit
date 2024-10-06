@@ -21,21 +21,18 @@ const ImageGallery = ({ user }: ImageGalleryProps) => {
     imageId,
   }));
 
+  // todo: fix download when live on makeit.ai domain
   const handleDownload = (imageUrl: string, imageName: string) => async () => {
+    const link = document.createElement("a");
+
     try {
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
+      link.href = imageUrl;
       link.download = imageName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Error downloading image:", error);
-      // You might want to show an error message to the user here
+      console.error(error);
     }
   };
 
@@ -87,7 +84,7 @@ const ImageGallery = ({ user }: ImageGalleryProps) => {
                     <button
                       onClick={handleDownload(
                         img.imageUrl,
-                        `design_${index + 1}.jpg`
+                        img.imageUrl.split("/").pop() || ""
                       )}
                       className="p-2 bg-background/80 rounded-full shadow-md hover:bg-background transition-colors"
                     >
