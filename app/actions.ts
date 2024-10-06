@@ -43,13 +43,3 @@ export async function getImageInfo(imageId: string) {
     console.error(error);
   }
 }
-
-export async function getImageDownloadUrl(objectName: string) {
-  try {
-    const url = await getDownloadUrl(objectName);
-    return { url };
-  } catch (error) {
-    console.error("Error getting download URL:", error);
-    return { error: "Failed to get download URL" };
-  }
-}
