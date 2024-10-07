@@ -81,7 +81,7 @@ const ImageGallery = ({ user }: ImageGalleryProps) => {
                     >
                       <Expand className="w-6 h-6 text-foreground/70" />
                     </button>
-                    <button
+                    {/* <button
                       onClick={handleDownload(
                         img.imageUrl,
                         img.imageUrl.split("/").pop() || ""
@@ -89,7 +89,7 @@ const ImageGallery = ({ user }: ImageGalleryProps) => {
                       className="p-2 bg-background/80 rounded-full shadow-md hover:bg-background transition-colors"
                     >
                       <Download className="w-6 h-6 text-foreground/70" />
-                    </button>
+                    </button> */}
                   </div>
                 </>
               )}

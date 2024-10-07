@@ -81,8 +81,6 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
     }
   };
 
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-
   const handlePaste = (e: any) => {
     const items = e.clipboardData.items;
     for (let i = 0; i < items.length; i++) {
@@ -109,7 +107,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
   };
 
   return (
-    <div className="flex flex-col h-full min-w-[24rem] md:h-[calc(100vh-80px)] md:max-h-[calc(100vh-80px)]">
+    <section className="flex flex-col h-full min-w-[24rem] md:h-[calc(100vh-80px)] md:max-h-[calc(100vh-80px)]">
       <ScrollArea>
         <div className="flex-grow border-r border-t-border p-4 space-y-6">
           <Form {...form}>
@@ -371,6 +369,6 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
           )}
         </Button>
       </div>
-    </div>
+    </section>
   );
 }
