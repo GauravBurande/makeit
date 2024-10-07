@@ -1,5 +1,4 @@
-// todo: receive the prediction result and process
-//     8. firt make sure the request is from replicate secure this webhook endpoint, but how? let's see
+// todo:
 //     9.[IMPORTANT] after done with basic image generation send the image then to the clarity upscaler if needed
 
 import { NextResponse } from "next/server";

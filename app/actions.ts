@@ -2,7 +2,6 @@
 
 import { getBeforeImages, getUser } from "@/lib/db";
 import connectMongo from "@/lib/mongoose";
-import { getDownloadUrl } from "@/lib/r2";
 import InteriorImage from "@/models/InteriorImage";
 
 export async function getUserForPolling() {

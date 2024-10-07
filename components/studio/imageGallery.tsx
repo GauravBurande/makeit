@@ -4,7 +4,7 @@ import React, { useState, useId } from "react";
 import Image from "next/image";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PlainUser } from "@/helpers/types";
-import { Loader, Expand, Download } from "lucide-react";
+import { Loader, Expand } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import ImageCard from "./blocks/imageCard";
 
@@ -22,19 +22,19 @@ const ImageGallery = ({ user }: ImageGalleryProps) => {
   }));
 
   // todo: fix download when live on makeit.ai domain
-  const handleDownload = (imageUrl: string, imageName: string) => async () => {
-    const link = document.createElement("a");
+  // const handleDownload = (imageUrl: string, imageName: string) => async () => {
+  //   const link = document.createElement("a");
 
-    try {
-      link.href = imageUrl;
-      link.download = imageName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  //   try {
+  //     link.href = imageUrl;
+  //     link.download = imageName;
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     document.body.removeChild(link);
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
 
   return (
     <ScrollArea className="h-full">
