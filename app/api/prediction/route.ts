@@ -50,7 +50,7 @@ const createInteriorPrompt = (
   if (color) {
     interiorPrompt += `. Utilize ${getColors(
       color
-    )} as the primary colors, weaving it throughout the design in various shades and tones to create depth and visual interest`;
+    )} and highlight ${color} as the primary colors, weaving it throughout the design in various shades and tones to create depth and visual interest`;
   }
 
   if (material) {

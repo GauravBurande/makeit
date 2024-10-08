@@ -21,6 +21,7 @@ function bufferToFile(
 
 const TOLERANCE = 5 * 60; // 5 minutes tolerance for timestamp verification
 const WEBHOOK_SECRET = env.REPLICATE_WEBHOOK_SECRET;
+const SECONDS_IN_24_HOURS = 24 * 60 * 60; // 86400 seconds in 24 hours
 async function verifyWebhook(req: Request, body: string) {
   const webhookId = req.headers.get("webhook-id");
   const webhookTimestamp = req.headers.get("webhook-timestamp");
@@ -99,6 +100,8 @@ export async function POST(req: Request) {
         console.log("Found status in MongoDB:", existingImage.status);
         // Update Redis with the status from MongoDB for future quick access
         await redis.set(`prediction:${body.id}:status`, existingImage.status);
+        await redis.expire(`prediction:${body.id}:status`, SECONDS_IN_24_HOURS);
+
         return NextResponse.json({
           message: `Prediction already ${existingImage.status}`,
         });
@@ -129,6 +132,7 @@ export async function POST(req: Request) {
 
           // Set the initial status
           await redis.set(`prediction:${body.id}:status`, "processing");
+
           console.log("redis db state to processing");
 
           console.log("sending image to upscaler");
@@ -151,7 +155,15 @@ export async function POST(req: Request) {
             console.log("updating redis db state to upscaling");
             // Update Redis with the new prediction ID and status
             await redis.set(`prediction:${body.id}:status`, "upscaling");
+            await redis.expire(
+              `prediction:${body.id}:status`,
+              SECONDS_IN_24_HOURS
+            );
             await redis.set(`prediction:${response.id}:initial_id`, body.id);
+            await redis.expire(
+              `prediction:${body.id}:initial_id`,
+              SECONDS_IN_24_HOURS
+            );
 
             // update the id in interior docuemnt too
             const interiorImage = await InteriorImage.findOneAndUpdate(
@@ -267,12 +279,15 @@ export async function POST(req: Request) {
           { status: 404 }
         );
       }
-      await redis.del(`prediction:${body.id}:status`);
-      await redis.del(`prediction:${body.id}:initial_id`);
+      await redis.del(
+        `prediction:${body.id}:status`,
+        `prediction:${body.id}:initial_id`
+      );
       console.log("Webhook processing completed successfully");
     } else if (body.status === "failed") {
       const failedImage = `${configs.r2.bucketUrl}/public/failed.png`;
       await redis.set(`prediction:${body.id}:status`, "failed");
+      await redis.expire(`prediction:${body.id}:status`, SECONDS_IN_24_HOURS);
       const interiorImage = await InteriorImage.findOneAndUpdate(
         { predictionId: body.id },
         {
