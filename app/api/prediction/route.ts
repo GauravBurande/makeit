@@ -1,3 +1,4 @@
+import { colorSchemes } from "@/helpers/constants";
 import { createReplicatePrediction } from "@/helpers/createPrediction";
 import connectMongo from "@/lib/mongoose";
 import { authOptions } from "@/lib/next-auth";
@@ -22,6 +23,13 @@ interface RequestBody {
   material: string;
 }
 
+function getColors(name: string): string[] | null {
+  const scheme = colorSchemes.find(
+    (s) => s.name.toLowerCase() === name.toLowerCase()
+  );
+  return scheme ? scheme.colors : null;
+}
+
 const createInteriorPrompt = (
   style: any,
   roomType: any,
@@ -40,7 +48,9 @@ const createInteriorPrompt = (
   }
 
   if (color) {
-    interiorPrompt += `. Utilize ${color} as the primary color, weaving it throughout the design in various shades and tones to create depth and visual interest`;
+    interiorPrompt += `. Utilize ${getColors(
+      color
+    )} as the primary colors, weaving it throughout the design in various shades and tones to create depth and visual interest`;
   }
 
   if (material) {

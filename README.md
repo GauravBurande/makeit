@@ -1,5 +1,6 @@
 ## TODO list:
 
+- add load more images in gallery and expire redis values after 24 hours
 - IMPORTANT: change logo and branding on stripe account
 - also how to reset monthly usage limits when user purchases yearly plan?(not so important now), a daily cron job!
 - add customer support for pro and premium usrs
@@ -11,3 +12,7 @@
 - research and development on ai models for best interior images, testing and setup on runpod.io (later)
 - now's just empty rooms or redesign rooms, add sketch to result too with advance comfyui workflow on runpod.io
 - user can download image, copy prompt, favourite and delete them or maybe edit if user asked for such feature.
+
+## faqs:
+
+- Will I always get nice images? answer: Sometimes based on your input, our ai model will try it's best but still generate not so nice images.
