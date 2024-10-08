@@ -1,6 +1,3 @@
-// todo:
-//     9.[IMPORTANT] after done with basic image generation send the image then to the clarity upscaler if needed
-
 import { NextResponse } from "next/server";
 import sharp from "sharp";
 import { uploadImageFileAndReturnUrl } from "@/lib/r2";

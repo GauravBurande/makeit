@@ -11,6 +11,3 @@
 - research and development on ai models for best interior images, testing and setup on runpod.io (later)
 - now's just empty rooms or redesign rooms, add sketch to result too with advance comfyui workflow on runpod.io
 - user can download image, copy prompt, favourite and delete them or maybe edit if user asked for such feature.
-
-- for security implement rate limiting later on with upstash/redis (not like it happens everyday)
-- and send the user to 429 page with into about what happened and wait a miute and then try logging
