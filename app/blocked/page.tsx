@@ -12,7 +12,8 @@ export default function BlockedPage() {
             <LockIcon className="h-24 w-24 mb-4" />
             <h1 className="text-3xl font-bold mb-2">Access Blocked</h1>
             <p className="text-center">
-              We've temporarily restricted access to your account.
+              We&apos;re sorry, but you have temporarily restricted access to
+              your account.
             </p>
           </div>
 
