@@ -10,6 +10,8 @@ import connectMongo from "@/lib/mongoose";
 import configs from "@/config";
 import crypto from "crypto";
 import { env } from "@/env";
+import { Redis } from "@upstash/redis";
+import { createReplicatePrediction } from "@/helpers/createPrediction";
 
 // convert Buffer to File
 function bufferToFile(
@@ -23,7 +25,6 @@ function bufferToFile(
 const TOLERANCE = 5 * 60; // 5 minutes tolerance for timestamp verification
 const WEBHOOK_SECRET = env.REPLICATE_WEBHOOK_SECRET;
 async function verifyWebhook(req: Request, body: string) {
-  console.log("Verifying webhook...");
   const webhookId = req.headers.get("webhook-id");
   const webhookTimestamp = req.headers.get("webhook-timestamp");
   const webhookSignature = req.headers.get("webhook-signature");
@@ -62,28 +63,136 @@ async function verifyWebhook(req: Request, body: string) {
 
 export async function POST(req: Request) {
   try {
+    const redis = new Redis({
+      url: env.UPSTASH_REDIS_REST_URL,
+      token: env.UPSTASH_REDIS_REST_TOKEN,
+    });
+
     const bodyText = await req.text();
-    console.log("Raw body:", bodyText);
     const verifiedPayload = await verifyWebhook(req, bodyText);
-    console.log("Verified webhook payload:", verifiedPayload);
 
     // Use the verified payload for further processing
     const body = verifiedPayload;
-    console.log("Prediction body:", body);
 
     await connectMongo();
 
-    const existingImage = await InteriorImage.findOne({
-      predictionId: body.id,
-      status: { $in: ["completed", "failed"] },
-    });
-    if (existingImage) {
-      console.log("This prediction has already been processed");
-      return NextResponse.json({ message: "Prediction already processed" });
+    const redisStatus: string | null = await redis.get(
+      `prediction:${body.id}:status`
+    );
+
+    if (
+      redisStatus &&
+      ["completed", "failed", "upscaling"].includes(redisStatus)
+    ) {
+      console.log("Found status in Redis:", redisStatus);
+      return NextResponse.json({
+        message: `Prediction already ${redisStatus}`,
+      });
+    }
+
+    // If not found in Redis, check MongoDB
+    if (!redisStatus) {
+      console.log("no status in redis, checking mongodb");
+      const existingImage = await InteriorImage.findOne({
+        predictionId: body.id,
+        status: { $in: ["completed", "failed"] },
+      });
+
+      if (existingImage) {
+        console.log("Found status in MongoDB:", existingImage.status);
+        // Update Redis with the status from MongoDB for future quick access
+        await redis.set(`prediction:${body.id}:status`, existingImage.status);
+        return NextResponse.json({
+          message: `Prediction already ${existingImage.status}`,
+        });
+      }
     }
 
     if (body.status === "succeeded") {
-      const imageUrl = body.output;
+      const imageUrl = body.output[0];
+
+      const initialModel = "adirik/interior-design";
+      const initialModelVersion =
+        "76604baddc85b1b4616e1c6475eca080da339c8875bd4996705440484a6eac38";
+
+      if (initialModel == body.model && initialModelVersion == body.version) {
+        const interiorImageUrl = body.output;
+        console.log("Attempting to process and upscale the image");
+
+        try {
+          // Check if the prediction is already being processed
+          const status = await redis.get(`prediction:${body.id}:status`);
+
+          if (status === "processing" || status === "upscaling") {
+            console.error("This prediction is already being processed");
+            return NextResponse.json({
+              message: "Prediction already being processed",
+            });
+          }
+
+          // Set the initial status
+          await redis.set(`prediction:${body.id}:status`, "processing");
+          console.log("redis db state to processing");
+
+          console.log("sending image to upscaler");
+          const input = {
+            prompt: `${body.input.prompt}, masterpiece, best quality, highres, <lora:more_details:0.5> <lora:SDXLrender_v2.0:1>`,
+            image: interiorImageUrl,
+            negative_prompt:
+              "(worst quality, low quality, normal quality:2) JuggernautNegative-neg",
+          };
+
+          const upscaleModelVersion =
+            "dfad41707589d68ecdccd1dfa600d55a208f9310748e44bfe35b4a6291453d5e";
+          const response = await createReplicatePrediction(
+            input,
+            upscaleModelVersion
+          );
+
+          if (response.id) {
+            console.log("Upscale request sent:", response.id);
+            console.log("updating redis db state to upscaling");
+            // Update Redis with the new prediction ID and status
+            await redis.set(`prediction:${body.id}:status`, "upscaling");
+            await redis.set(`prediction:${response.id}:initial_id`, body.id);
+
+            // update the id in interior docuemnt too
+            const interiorImage = await InteriorImage.findOneAndUpdate(
+              {
+                predictionId: body.id,
+              },
+              {
+                $set: {
+                  predictionId: response.id,
+                  status: "upscaling",
+                },
+              },
+              {
+                new: true,
+              }
+            );
+
+            console.log("updated interior image id: ", interiorImage);
+
+            if (!interiorImage) {
+              throw new Error("Failed to update image in MongoDB");
+            }
+
+            console.log("Upscale request sent:", response.id);
+            return NextResponse.json({ message: "Processed successfully" });
+          } else {
+            throw new Error("Failed to get prediction ID from Replicate");
+          }
+        } catch (error) {
+          console.error(error);
+          // In case of an error, reset the status
+          await redis.del(`prediction:${body.id}:status`);
+          return NextResponse.json(
+            { message: "Failed to process image" },
+            { status: 500 }
+          );
+        }
+      }
 
       const imageResponse = await fetch(imageUrl);
       const imageBuffer = await imageResponse.arrayBuffer();
@@ -130,7 +239,7 @@ export async function POST(req: Request) {
       );
 
       if (!interiorImage) {
-        console.log("InteriorImage not found");
+        console.error("InteriorImage not found");
         return NextResponse.json(
           { error: "InteriorImage not found" },
           { status: 404 }
@@ -155,17 +264,18 @@ export async function POST(req: Request) {
       );
 
       if (!user) {
-        console.log("User not found or interiorImage not in user's array");
+        console.error("User not found or interiorImage not in user's array");
         return NextResponse.json(
           { error: "User not found or interiorImage not in user's array" },
           { status: 404 }
         );
       }
-
+      await redis.del(`prediction:${body.id}:status`);
+      await redis.del(`prediction:${body.id}:initial_id`);
       console.log("Webhook processing completed successfully");
     } else if (body.status === "failed") {
-      // Process failed prediction
       const failedImage = `${configs.r2.bucketUrl}/public/failed.png`;
+      await redis.set(`prediction:${body.id}:status`, "failed");
       const interiorImage = await InteriorImage.findOneAndUpdate(
         { predictionId: body.id },
         {
@@ -178,7 +288,7 @@ export async function POST(req: Request) {
       );
 
       if (!interiorImage) {
-        console.log("InteriorImage not found");
+        console.error("InteriorImage not found");
         return NextResponse.json(
           { error: "InteriorImage not found" },
           { status: 404 }
@@ -199,7 +309,7 @@ export async function POST(req: Request) {
       );
 
       if (!user) {
-        console.log("User not found or interiorImage not in user's array");
+        console.error("User not found or interiorImage not in user's array");
         return NextResponse.json(
           { error: "User not found or interiorImage not in user's array" },
           { status: 404 }
@@ -208,7 +318,7 @@ export async function POST(req: Request) {
 
       console.log("Failed prediction processed");
     } else {
-      console.log("Prediction not yet completed");
+      console.error("Prediction not yet completed");
       return NextResponse.json({ message: "Prediction not yet completed" });
     }
 

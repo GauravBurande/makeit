@@ -5,7 +5,7 @@ import connectMongo from "@/lib/mongoose";
 import User from "@/models/User";
 import Subscription from "@/models/Subscriptions";
 import configs from "@/config";
-import { env } from "process";
+import { env } from "@/env";
 
 const stripe = new Stripe(env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",

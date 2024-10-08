@@ -1,16 +1,13 @@
+import { createReplicatePrediction } from "@/helpers/createPrediction";
 import connectMongo from "@/lib/mongoose";
 import { authOptions } from "@/lib/next-auth";
 import InteriorImage from "@/models/InteriorImage";
 import User from "@/models/User";
-import mongoose from "mongoose";
 import { getServerSession } from "next-auth";
-import { revalidatePath } from "next/cache";
-import { env } from "process";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-const REPLICATE_API_URL = "https://api.replicate.com/v1/predictions";
 const REPLICATE_MODEL_VERSION =
   "76604baddc85b1b4616e1c6475eca080da339c8875bd4996705440484a6eac38";
 
@@ -23,45 +20,6 @@ interface RequestBody {
   roomType: string;
   color: string;
   material: string;
-}
-
-async function createReplicatePrediction(input: any) {
-  const token = env.REPLICATE_API_KEY;
-  if (!token) {
-    throw new Error("REPLICATE_API_KEY is not set");
-  }
-
-  const webhookEndPoint = `${
-    process.env.NODE_ENV === "production"
-      ? "https://makeit-interior-deisgner.vercel.app"
-      : // todo: use this when added custom domain
-        // ? "https://makeit.ai"
-        "https://open-deeply-coyote.ngrok-free.app"
-  }/api/webhook/prediction`;
-
-  const response = await fetch(REPLICATE_API_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      version: REPLICATE_MODEL_VERSION,
-      webhook: webhookEndPoint,
-      webhook_events_filter: ["completed"],
-      input: {
-        prompt: input.prompt,
-        image: input.image,
-        negative_prompt: input.negativePrompt,
-      },
-    }),
-  });
-
-  if (!response.ok) {
-    console.log(response);
-    throw new Error(`Failed to create prediction: ${response.statusText}`);
-  }
-  return response.json();
 }
 
 const createInteriorPrompt = (
@@ -97,7 +55,6 @@ const createInteriorPrompt = (
 };
 
 export async function POST(req: Request) {
-  let session: mongoose.ClientSession | null = null;
   try {
     // @ts-ignore
     const user = await getServerSession(authOptions);
@@ -127,36 +84,29 @@ export async function POST(req: Request) {
         material,
         prompt
       );
-      let prediction = await createReplicatePrediction({
-        prompt: interiorPrompt,
-        image,
-        negativePrompt,
-      });
-
-      const isTransactionSupported = await isTransactionEnabled(conn as any);
-
-      if (isTransactionSupported) {
-        session = await conn.startSession();
-        session.startTransaction();
-      }
-
-      const interiorImage = await InteriorImage.create(
-        [
-          {
-            predictionId: prediction.id,
-            userId,
-            prompt,
-            beforeImage: image,
-            afterImage: "",
-            negativePrompt,
-            style,
-            roomType,
-            color,
-            material,
-          },
-        ],
-        session ? { session } : undefined
+      let prediction = await createReplicatePrediction(
+        {
+          prompt: interiorPrompt,
+          image,
+          negative_prompt: negativePrompt,
+        },
+        REPLICATE_MODEL_VERSION
       );
+
+      const interiorImage = await InteriorImage.create([
+        {
+          predictionId: prediction.id,
+          userId,
+          prompt,
+          beforeImage: image,
+          afterImage: "",
+          negativePrompt,
+          style,
+          roomType,
+          color,
+          material,
+        },
+      ]);
 
       // Update the user document
 
@@ -171,15 +121,11 @@ export async function POST(req: Request) {
             },
           },
         },
-        session ? { new: true, session } : { new: true }
+        { new: true }
       );
 
       if (!updatedUser) {
         throw new Error("User not found");
-      }
-
-      if (session) {
-        await session.commitTransaction();
       }
 
       return new Response(JSON.stringify(prediction), { status: 201 });
@@ -190,9 +136,6 @@ export async function POST(req: Request) {
     }
   } catch (error) {
     console.error("Error in POST handler:", error);
-    if (session) {
-      await session.abortTransaction();
-    }
     console.error("Error creating interior image and updating user:", error);
     return new Response(
       JSON.stringify({
@@ -201,21 +144,5 @@ export async function POST(req: Request) {
       }),
       { status: 500 }
     );
-  } finally {
-    if (session) {
-      session.endSession();
-    }
-  }
-}
-
-async function isTransactionEnabled(
-  connection: mongoose.Connection
-): Promise<boolean> {
-  try {
-    await connection.db.admin().command({ ping: 1 });
-    return true;
-  } catch (error) {
-    console.warn("Transactions not supported:", error);
-    return false;
   }
 }

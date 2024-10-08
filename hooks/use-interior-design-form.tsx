@@ -290,7 +290,7 @@ export const useInteriorDesignForm = (user: PlainUser) => {
       });
       pollingTimeout = setTimeout(() => {
         polling();
-      }, 7000);
+      }, 30000);
       router.refresh();
       return () => {
         if (pollingTimeout) {
