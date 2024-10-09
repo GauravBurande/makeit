@@ -27,6 +27,7 @@ const ImageGallery = ({ user }: ImageGalleryProps) => {
   const [images, setimages] = useState(initialImages);
   const [expandedImage, setExpandedImage] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [disabled, setDisabled] = useState(false);
 
   const LoadMoreImages = async () => {
     try {
@@ -45,7 +46,7 @@ const ImageGallery = ({ user }: ImageGalleryProps) => {
           title: "No new images",
           description: "All images have already been loaded.",
         });
-        setLoading(false);
+        setDisabled(true);
         return;
       }
       const newImages = Array.from(
@@ -141,6 +142,7 @@ const ImageGallery = ({ user }: ImageGalleryProps) => {
           {images?.length > 11 && (
             <Button
               onClick={LoadMoreImages}
+              disabled={loading || disabled}
               className="flex items-center gap-4 uppercase w-[97%] mx-auto my-4"
             >
               {loading ? (
