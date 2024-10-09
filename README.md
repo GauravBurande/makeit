@@ -1,6 +1,5 @@
 ## TODO list:
 
-- add load more images in gallery and expire redis values after 24 hours
 - IMPORTANT: change logo and branding on stripe account
 - also how to reset monthly usage limits when user purchases yearly plan?(not so important now), a daily cron job!
 - add customer support for pro and premium usrs

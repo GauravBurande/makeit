@@ -45,7 +45,7 @@ export const getUser = cache(async (): Promise<PlainUser | null> => {
   }
 });
 
-export const getBilling = async () => {
+export const getBilling = cache(async () => {
   try {
     // @ts-ignore
     const session = await getServerSession(authOptions);
@@ -63,7 +63,7 @@ export const getBilling = async () => {
     console.error(error);
     return null;
   }
-};
+});
 
 export const getBeforeImages = async (): Promise<string[] | null> => {
   try {

@@ -13,10 +13,9 @@ interface ImageCardProps {
     imageId: string;
   };
   onClose: () => void;
-  id: string;
 }
 
-const ImageCard = ({ image, onClose, id }: ImageCardProps) => {
+const ImageCard = ({ image, onClose }: ImageCardProps) => {
   const [imageInfo, setImageInfo] = useState<IInteriorImage | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -55,7 +54,7 @@ const ImageCard = ({ image, onClose, id }: ImageCardProps) => {
 
   return (
     <motion.div
-      layoutId={`card-${image.imageId}-${id}`}
+      layoutId={`card-${image.imageId}`}
       className="fixed inset-0 flex items-center justify-center z-50"
     >
       <motion.div
@@ -82,7 +81,7 @@ const ImageCard = ({ image, onClose, id }: ImageCardProps) => {
         ) : (
           <>
             <motion.div
-              layoutId={`image-${image.imageId}-${id}`}
+              layoutId={`image-${image.imageId}`}
               className="relative mb-6"
             >
               <BeforeAfterSlider
