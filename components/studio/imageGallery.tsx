@@ -18,24 +18,28 @@ interface ImageGalleryProps {
 const ImageGallery = ({ user }: ImageGalleryProps) => {
   const { toast } = useToast();
 
-  const initialImages = (user?.interiorImages || [])
-    .reverse()
-    .map(({ imageUrl, imageId }) => ({
+  const initialImages = (user?.interiorImages || []).map(
+    ({ imageUrl, imageId }) => ({
       imageUrl,
       imageId,
-    }));
-  const [images, setimages] = useState(initialImages);
+    })
+  );
+  const [additionalImages, setAdditionalImages] = useState<
+    Array<{ imageUrl: string; imageId: string }>
+  >([]);
   const [expandedImage, setExpandedImage] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [disabled, setDisabled] = useState(false);
 
+  const allImages = [...additionalImages, ...initialImages];
+
   const LoadMoreImages = async () => {
     try {
       setLoading(true);
-      const sliceValue = images.length + 12;
+      const sliceValue = allImages.length + 12;
       const nextImages = await GetMoreImages(sliceValue);
       if (!nextImages) return;
-      const existingImageIds = new Set(images.map((img) => img.imageId));
+      const existingImageIds = new Set(allImages.map((img) => img.imageId));
       const actuallyNewImages = nextImages.filter(
         (img) => !existingImageIds.has(img.imageId)
       );
@@ -49,34 +53,17 @@ const ImageGallery = ({ user }: ImageGalleryProps) => {
         setDisabled(true);
         return;
       }
-      const newImages = Array.from(
-        new Map(
-          [...images, ...nextImages].map((img) => [img.imageId, img])
-        ).values()
-      );
 
-      setimages(newImages);
+      setAdditionalImages((prevAdditionalImages) => [
+        ...prevAdditionalImages,
+        ...actuallyNewImages,
+      ]);
     } catch (error) {
       console.error("Error fetching more images:", error);
     } finally {
       setLoading(false);
     }
   };
-
-  // todo: fix download when live on makeit.ai domain
-  // const handleDownload = (imageUrl: string, imageName: string) => async () => {
-  //   const link = document.createElement("a");
-
-  //   try {
-  //     link.href = imageUrl;
-  //     link.download = imageName;
-  //     document.body.appendChild(link);
-  //     link.click();
-  //     document.body.removeChild(link);
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
 
   return (
     <ScrollArea className="h-full">
@@ -90,10 +77,10 @@ const ImageGallery = ({ user }: ImageGalleryProps) => {
           />
         )}
       </AnimatePresence>
-      {images?.length > 0 ? (
+      {allImages.length > 0 ? (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-            {images.map((img, index) => (
+            {allImages.reverse().map((img, index) => (
               <motion.div
                 key={img.imageId}
                 layoutId={`card-${img.imageId}}`}
@@ -124,22 +111,13 @@ const ImageGallery = ({ user }: ImageGalleryProps) => {
                       >
                         <Expand className="w-6 h-6 text-foreground/70" />
                       </button>
-                      {/* <button
-                      onClick={handleDownload(
-                        img.imageUrl,
-                        img.imageUrl.split("/").pop() || ""
-                      )}
-                      className="p-2 bg-background/80 rounded-full shadow-md hover:bg-background transition-colors"
-                    >
-                      <Download className="w-6 h-6 text-foreground/70" />
-                    </button> */}
                     </div>
                   </>
                 )}
               </motion.div>
             ))}
           </div>
-          {images?.length > 11 && (
+          {allImages.length > 11 && (
             <Button
               onClick={LoadMoreImages}
               disabled={loading || disabled}
