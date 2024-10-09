@@ -7,9 +7,9 @@ import { authOptions } from "@/lib/next-auth";
 import InteriorImage from "@/models/InteriorImage";
 import User from "@/models/User";
 import { getServerSession } from "next-auth";
+import { cache } from "react";
 
 export async function getUserForPolling() {
-  console.log("revalidating studio path");
   try {
     const user = await getUser();
     if (!user) {
@@ -47,7 +47,7 @@ export async function getImageInfo(imageId: string) {
   }
 }
 
-export async function GetMoreImages(sliceValue: number) {
+export const GetMoreImages = cache(async function (sliceValue: number) {
   try {
     await connectMongo();
     // @ts-ignore
@@ -81,4 +81,4 @@ export async function GetMoreImages(sliceValue: number) {
   } catch (error) {
     console.error(error);
   }
-}
+});

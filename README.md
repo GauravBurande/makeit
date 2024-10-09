@@ -1,6 +1,7 @@
 ## TODO list:
 
 - IMPORTANT: change logo and branding on stripe account
+- also the stripe webhook value in the stripe dashboard with the custom domain
 - also how to reset monthly usage limits when user purchases yearly plan?(not so important now), a daily cron job!
 - add customer support for pro and premium usrs
 - maybe add watermark implementation for images in personal plan tier
