@@ -44,6 +44,21 @@ export const createCheckout = async ({
     extraParams.tax_id_collection = { enabled: true };
   }
 
+  let subscriptionData:
+    | Stripe.Checkout.SessionCreateParams.SubscriptionData
+    | undefined;
+  if (isYearly && mode === "subscription") {
+    // Create a subscription schedule for yearly subscriptions with monthly billing
+    const now = Math.floor(Date.now() / 1000);
+    const tenMinutesLater = now + 10 * 60; // Add 10 minutes
+    subscriptionData = {
+      billing_cycle_anchor: tenMinutesLater,
+      proration_behavior: "none",
+    };
+    extraParams.subscription_data = subscriptionData;
+    // After checkout, we'll create a subscription schedule
+    extraParams.expand = ["subscription"];
+  }
   const stripeSession = await stripe.checkout.sessions.create({
     mode,
     allow_promotion_codes: true,
@@ -66,6 +81,40 @@ export const createCheckout = async ({
     ...extraParams,
   });
 
+  if (isYearly && mode === "subscription" && stripeSession.subscription) {
+    // Create a subscription schedule for the yearly subscription
+    const subscriptionId =
+      typeof stripeSession.subscription === "string"
+        ? stripeSession.subscription
+        : stripeSession.subscription.id;
+    // Retrieve the subscription to get its details
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    // Create a $0 price for monthly invoices
+    const zeroPrice = await stripe.prices.create({
+      unit_amount: 0,
+      currency: subscription.currency,
+      recurring: { interval: "day" }, //todo: change to monthly, day is for testing
+      product: subscription.items.data[0].price.product as string,
+    });
+    /// Create a subscription schedule for monthly $0 invoices
+    await stripe.subscriptionSchedules.create({
+      customer: subscription.customer as string,
+      start_date: Math.floor(Date.now() / 1000) + 1 * 24 * 60 * 60, // Start 30 days from now, todo: but set to 1 to test for day
+      end_behavior: "release",
+      phases: [
+        {
+          items: [
+            {
+              price: zeroPrice.id,
+              quantity: 1,
+            },
+          ],
+          iterations: 11, // 11 monthly $0 invoices (12th month is covered by the initial charge)
+          proration_behavior: "none",
+        },
+      ],
+    });
+  }
   return stripeSession.url;
 };
 
