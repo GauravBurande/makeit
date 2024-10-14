@@ -20,7 +20,6 @@ export const createCheckout = async ({
   mode,
   successUrl,
   cancelUrl,
-  isYearly,
   couponId,
   clientReferenceId,
   user,
