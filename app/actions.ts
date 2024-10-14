@@ -33,7 +33,7 @@ export async function getPreviousImages() {
   }
 }
 
-export async function getImageInfo(imageId: string) {
+export const getImageInfo = cache(async function (imageId: string) {
   try {
     await connectMongo();
     const imageInfo = await InteriorImage.findOne({ _id: imageId });
@@ -45,7 +45,7 @@ export async function getImageInfo(imageId: string) {
   } catch (error) {
     console.error(error);
   }
-}
+});
 
 export const GetMoreImages = cache(async function (sliceValue: number) {
   try {

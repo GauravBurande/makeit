@@ -1,7 +1,9 @@
 ## TODO list:
 
+- host the both public models privately on replicate(not needed but maybe do it)
 - IMPORTANT: change logo and branding on stripe account
 - also the stripe webhook value in the stripe dashboard with the custom domain
+- favouriting images, affiliate, chat support with landing page revamp from this inspiration: https://renovateai.app/
 - also how to reset monthly usage limits when user purchases yearly plan?(not so important now), a daily cron job!
 - add customer support for pro and premium usrs
 - maybe add watermark implementation for images in personal plan tier
@@ -13,6 +15,6 @@
 - now's just empty rooms or redesign rooms, add sketch to result too with advance comfyui workflow on runpod.io
 - user can download image, copy prompt, favourite and delete them or maybe edit if user asked for such feature.
 
-## faqs:
+## faqs(maybe create a help centre):
 
 - Will I always get nice images? answer: Sometimes based on your input, our ai model will try it's best but still generate not so nice images.
