@@ -32,11 +32,11 @@ const configs = {
       priceId:
         process.env.NODE_ENV === "development"
           ? "price_1Q518uDNglLxTGmdGvr9S31g"
-          : "price_1Q518uDNglLxTGmdGvr9S31g",
+          : "price_1QLnASDNglLxTGmdcTlpehSU",
       yearlyPriceId:
         process.env.NODE_ENV === "development"
           ? "price_1Q51p8DNglLxTGmdckA7kAOv"
-          : "price_1Q51p8DNglLxTGmdckA7kAOv",
+          : "price_1QLnASDNglLxTGmdgZQAq7RB",
       price: 29,
       description:
         "Discover your inner designer and create your dream home with our cost-effective, user-friendly software.",
@@ -53,11 +53,11 @@ const configs = {
       priceId:
         process.env.NODE_ENV === "development"
           ? "price_1Q51BQDNglLxTGmddR9eTo3t"
-          : "price_1Q51BQDNglLxTGmddR9eTo3t",
+          : "price_1QLnAODNglLxTGmdAj7JziXl",
       yearlyPriceId:
         process.env.NODE_ENV === "development"
           ? "price_1Q51swDNglLxTGmdpv7HEXJt"
-          : "price_1Q51swDNglLxTGmdpv7HEXJt",
+          : "price_1QLnAODNglLxTGmdU2mNh6LN",
       price: 59,
       description:
         "Brainstorm ideas quickly, impress clients with stunning visuals, and close deals faster using our professional tools.",
@@ -76,11 +76,11 @@ const configs = {
       priceId:
         process.env.NODE_ENV === "development"
           ? "price_1Q51ugDNglLxTGmdPFMy97Z4"
-          : "price_1Q51ugDNglLxTGmdPFMy97Z4",
+          : "price_1QLnADDNglLxTGmdMcJGM8fp",
       yearlyPriceId:
         process.env.NODE_ENV === "development"
           ? "price_1Q51vDDNglLxTGmdUSATlves"
-          : "price_1Q51vDDNglLxTGmdUSATlves",
+          : "price_1QLnADDNglLxTGmdGdyFnchP",
       price: 99,
       description:
         "Empower your firm with cutting-edge AI technology to enhance efficiency and stay competitive in the market.",
