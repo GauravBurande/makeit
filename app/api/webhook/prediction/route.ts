@@ -10,6 +10,10 @@ import { env } from "@/env";
 import { Redis } from "@upstash/redis";
 import { createReplicatePrediction } from "@/helpers/createPrediction";
 
+// TODO: fix -> An error occurred with your deployment
+// FUNCTION_INVOCATION_TIMEOUT
+// polling max attempts 20 outs, and still shows loading state fix it, maybe on both sides later.
+
 // convert Buffer to File
 function bufferToFile(
   buffer: Buffer,

@@ -117,7 +117,7 @@ export function InteriorDesignForm({ user }: interiorFormProps) {
                 name="beforeImage"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Image</FormLabel>
+                    <FormLabel>Room Image</FormLabel>
                     <div
                       className={`border rounded-md p-4 ${
                         dragActive ? "border-primary" : "border-accent/20"

@@ -1,11 +1,11 @@
 ## TODO list:
 
 - host the both public models privately on replicate(not needed but maybe do it)
-- IMPORTANT: change logo and branding on stripe account
 - also the stripe webhook value in the stripe dashboard with the custom domain
 - favouriting images, affiliate, chat support with landing page revamp from this inspiration: https://renovateai.app/
+- plausible analytics integration
 - also how to reset monthly usage limits when user purchases yearly plan?(not so important now), a daily cron job!
-- add customer support for pro and premium usrs
+- add customer support for pro and premium users
 - maybe add watermark implementation for images in personal plan tier
 - prompt suggest feature (ok maybe if needed)
 - also add the privacy-policy and the tos

@@ -119,7 +119,7 @@ export const BillingSection = ({ user, billing }: BillingProps) => {
                 {formatDate(billing?.currentPeriodEnd)}
               </span>
             ) : (
-              <span>User hasn&apos;t purchased any plan yet!</span>
+              <span>You haven&apos;t purchased any plan yet!</span>
             )}
           </div>
 

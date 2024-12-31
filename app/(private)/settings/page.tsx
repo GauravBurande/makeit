@@ -1,10 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { CircleUser, HardDrive, ImageIcon, Mail } from "lucide-react";
 import UsageCard from "@/components/studio/blocks/usage";
 import { DangerZone } from "@/components/blocks/dangerZone";
 import { getBilling, getUser } from "@/lib/db";
 import { PlainUser } from "@/helpers/types";
 import { BillingSection } from "@/components/blocks/billing";
+import CustomerSupport from "@/components/blocks/customerSupport";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +34,7 @@ export default async function Settings() {
     <main className="min-h-screen space-y-12 p-10 w-full max-w-3xl mx-auto">
       <AccountOverview user={user} />
       <BillingSection billing={billing} user={user} />
+      <CustomerSupport />
       <DangerZone user={user} />
     </main>
   );

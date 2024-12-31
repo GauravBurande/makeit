@@ -48,7 +48,7 @@ export const useInteriorDesignForm = (user: PlainUser) => {
     beforeImage: "",
     prompt: "",
     negativePrompt:
-      "lowres, watermark, banner, logo, contactinfo, text, deformed, blurry, blur, out of focus, out of frame, surreal, extra, ugly, upholstered walls, fabric walls, plush walls, mirror, mirrored, functional, realistic, illustration, distorted, horror",
+      "lowres, watermark, banner, logo, contactinfo, text, deformed, blurry, grained, blur, out of focus, out of frame, surreal, extra, ugly, upholstered walls, fabric walls, plush walls, mirror, mirrored, functional, realistic, illustration, distorted, horror",
     style: "",
     roomType: "",
     color: "",
