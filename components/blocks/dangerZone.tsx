@@ -19,7 +19,6 @@ import { Trash2 } from "lucide-react";
 import SignOut from "../signOut";
 import { PlainUser } from "@/helpers/types";
 import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 
 interface DangerZoneProps {
