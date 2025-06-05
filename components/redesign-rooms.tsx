@@ -4,10 +4,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import configs from "@/config";
 
-const beforeImage = `${configs.r2.bucketUrl}/public/beforeafters/before2.webp`;
-const afterImage1 = `${configs.r2.bucketUrl}/public/beforeafters/after2.1.png`;
-const afterImage2 = `${configs.r2.bucketUrl}/public/beforeafters/after2.png`;
-const afterImage3 = `${configs.r2.bucketUrl}/public/beforeafters/after2.2.png`;
+const beforeImage = `/beforeafters/before2.webp`;
+const afterImage1 = `/beforeafters/after2.1.png`;
+const afterImage2 = `/beforeafters/after2.png`;
+const afterImage3 = `/beforeafters/after2.2.png`;
 
 const RedesignRooms = () => {
   return (

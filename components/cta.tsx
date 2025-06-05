@@ -5,8 +5,8 @@ import Link from "next/link";
 import configs from "@/config";
 
 const CTA = () => {
-  const beforeImage = `${configs.r2.bucketUrl}/public/beforeafters/before1.webp`;
-  const afterImage = `${configs.r2.bucketUrl}/public/beforeafters/after1.png`;
+  const beforeImage = `/beforeafters/before1.webp`;
+  const afterImage = `/beforeafters/after1.png`;
   return (
     <div className="rounded-xl p-8 shadow-lg">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-8">

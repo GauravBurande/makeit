@@ -12,7 +12,7 @@ interface Props {
 
 const Hero = ({ session }: Props) => {
   const designs = Array.from({ length: 9 }, (_, index) => ({
-    src: `${configs.r2.bucketUrl}/public/designs/${index + 1}.png`,
+    src: `/designs/${index + 1}.png`,
   }));
 
   return (

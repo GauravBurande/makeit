@@ -7,14 +7,14 @@ import configs from "@/config";
 const userTypes = [
   {
     title: "Home Owners",
-    imageUrl: `${configs.r2.bucketUrl}/public/userTypes/home-owners.webp`,
+    imageUrl: `/userTypes/home-owners.webp`,
     description: "Discover your dream home without breaking the bank.",
     details:
       "Our user-friendly, professional-grade tool empowers you to envision your perfect space with ease.",
   },
   {
     title: "Interior Designers",
-    imageUrl: `${configs.r2.bucketUrl}/public/userTypes/interior-designers.jpeg`,
+    imageUrl: `/userTypes/interior-designers.jpeg`,
     description:
       "Secure more clients and seal deals faster by generating a plethora of design ideas in a fraction of the time.",
     details:
@@ -22,7 +22,7 @@ const userTypes = [
   },
   {
     title: "Real Estate Agents",
-    imageUrl: `${configs.r2.bucketUrl}/public/userTypes/real-estate.jpeg`,
+    imageUrl: `/userTypes/real-estate.jpeg`,
     description:
       "Sell properties faster by showcasing multiple interior design possibilities to prospective clients.",
     details:
@@ -38,7 +38,7 @@ const userTypes = [
   //   },
   {
     title: "Airbnb Hosts",
-    imageUrl: `${configs.r2.bucketUrl}/public/userTypes/airbnb-hosts.webp`,
+    imageUrl: `/userTypes/airbnb-hosts.webp`,
     description:
       "Maximize your rental potential by showcasing beautiful, fully-furnished spaces to prospective guests.",
     details:

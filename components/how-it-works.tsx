@@ -13,8 +13,8 @@ const designImages = [
   "/designs/10.png",
 ];
 
-const beforeImage = `${configs.r2.bucketUrl}/public/beforeafters/before2.webp`;
-const afterImage = `${configs.r2.bucketUrl}/public/beforeafters/after2.png`;
+const beforeImage = `/beforeafters/before2.webp`;
+const afterImage = `/beforeafters/after2.png`;
 
 const HowItWorks = () => {
   return (

@@ -289,7 +289,7 @@ export async function POST(req: Request) {
       );
       console.log("Webhook processing completed successfully");
     } else if (body.status === "failed") {
-      const failedImage = `${configs.r2.bucketUrl}/public/failed.png`;
+      const failedImage = `/failed.png`;
       await redis.set(`prediction:${body.id}:status`, "failed");
       await redis.expire(`prediction:${body.id}:status`, SECONDS_IN_24_HOURS);
       const interiorImage = await InteriorImage.findOneAndUpdate(
