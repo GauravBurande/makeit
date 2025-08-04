@@ -1,3 +1,9 @@
+Another subscription payment after I abandon the project 😭
+
+
+![makeit-stripe-payment](https://github.com/user-attachments/assets/2247f139-e427-4c7e-832c-0a98a86db8c2)
+
+
 ## TODO list:
 
 - host the both public models privately on replicate(not needed but maybe do it)
