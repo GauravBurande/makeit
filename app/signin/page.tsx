@@ -56,8 +56,10 @@ export default function AuthenticationPage() {
                 Sign In to your account
               </h1>
               <p className="text-sm text-muted-foreground">
-                Sign in to your account to continue or start with designing
-                interior.
+                {/* Sign in to your account to continue or start with designing
+                interior. */}
+                Please use the Google Sign in, magic link email signin method is
+                not working.
               </p>
             </div>
             <UserAuthForm />
