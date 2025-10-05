@@ -33,7 +33,7 @@ const formatStorage = (value: number): string => {
   } else if (value >= 1024) {
     return `${(value / 1024).toFixed(2)} MB`;
   } else {
-    return `${value} KB`;
+    return `${value.toFixed(2)} KB`;
   }
 };
 
@@ -72,7 +72,10 @@ export function UsagePill({ storageUsed, storageLimit }: UsageProps) {
             />
             <p className="text-muted-foreground">
               <span className="text-foreground font-semibold">Storage</span> (
-              {usagePercentage.toFixed(2)}%)
+              {storageLimit == 0
+                ? formatStorage(storageUsed)
+                : usagePercentage.toFixed(2)}
+              %)
             </p>
           </div>
         </TooltipTrigger>
