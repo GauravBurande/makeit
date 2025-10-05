@@ -4,7 +4,6 @@ import { uploadImageFileAndReturnUrl } from "@/lib/r2";
 import User from "@/models/User";
 import InteriorImage from "@/models/InteriorImage";
 import connectMongo from "@/lib/mongoose";
-import configs from "@/config";
 import crypto from "crypto";
 import { env } from "@/env";
 import { Redis } from "@upstash/redis";
@@ -20,7 +19,7 @@ function bufferToFile(
   filename: string,
   mimetype: string
 ): File {
-  return new File([buffer], filename, { type: mimetype });
+  return new File([new Uint8Array(buffer)], filename, { type: mimetype });
 }
 
 const TOLERANCE = 5 * 60; // 5 minutes tolerance for timestamp verification

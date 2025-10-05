@@ -8,7 +8,7 @@ import ClientLayout from "@/components/layout-client";
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope" });
 
 export const metadata: Metadata = getSEOTags({
-  title: "MakeIt | Design your Interior" || configs.appName,
+  title: "MakeIt | Design your Interior",
   description: configs.description,
   keywords: ["keyword"],
   extraTags: {
