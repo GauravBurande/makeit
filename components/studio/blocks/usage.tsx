@@ -74,8 +74,8 @@ export function UsagePill({ storageUsed, storageLimit }: UsageProps) {
               <span className="text-foreground font-semibold">Storage</span> (
               {storageLimit == 0
                 ? formatStorage(storageUsed)
-                : usagePercentage.toFixed(2)}
-              %)
+                : `${usagePercentage.toFixed(2)} %`}
+              )
             </p>
           </div>
         </TooltipTrigger>
