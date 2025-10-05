@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -80,11 +80,14 @@ export const useInteriorDesignForm = (user: PlainUser) => {
     return () => subscription.unsubscribe();
   }, [form.watch, form]);
 
-  const PredictionLimits: any = {
-    Personal: 4,
-    Pro: 8, // keep it to 8, 2 is just for testing
-    Premium: 16,
-  };
+  const PredictionLimits: any = useMemo(
+    () => ({
+      Personal: 4,
+      Pro: 8, // keep it to 8, 2 is just for testing
+      Premium: 16,
+    }),
+    []
+  );
 
   const updateLoadingState = useCallback(
     (userData: any) => {
@@ -244,43 +247,62 @@ export const useInteriorDesignForm = (user: PlainUser) => {
     } = data;
 
     try {
-      const response = await fetch("/api/prediction", {
+      // Use Gemini endpoint with FormData
+      const formData = new FormData();
+      formData.append("userId", user._id);
+      formData.append("prompt", prompt);
+      formData.append("style", style || "");
+      formData.append("roomType", roomType || "");
+      formData.append("color", color || "");
+      formData.append("material", material || "");
+      // beforeImage is a URL or data string, but Gemini expects a File
+      // If beforeImage is a data URL, convert to File
+      let imageFile: File | null = null;
+      if (beforeImage.startsWith("data:image")) {
+        // Convert dataURL to File
+        const arr = beforeImage.split(",");
+        const mimeMatch = arr[0].match(/:(.*?);/);
+        const mime = mimeMatch ? mimeMatch[1] : "image/png";
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+          u8arr[n] = bstr.charCodeAt(n);
+        }
+        imageFile = new File([u8arr], "upload.png", { type: mime });
+      } else if (beforeImage.startsWith("http")) {
+        // Fetch the image and convert to File
+        const res = await fetch(beforeImage);
+        const blob = await res.blob();
+        imageFile = new File([blob], "upload.png", { type: blob.type });
+      }
+      if (imageFile) {
+        formData.append("image", imageFile);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Image Error",
+          description: "Could not process the image for generation.",
+        });
+        setIsLoading(false);
+        return;
+      }
+      const response = await fetch("/api/generate", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Cache-Control": "no-cache",
-        },
-        cache: "no-store",
-        next: {
-          revalidate: 0,
-        },
-        body: JSON.stringify({
-          userId: user._id,
-          image: beforeImage,
-          prompt,
-          negativePrompt,
-          style,
-          roomType,
-          color,
-          material,
-        }),
+        body: formData,
       });
-      const predictionData = await response.json();
-      console.log(predictionData);
-      if (response.status !== 201) {
+      const data = await response.json();
+      if (!response.ok) {
         toast({
           variant: "destructive",
           title: response.statusText,
-          description: predictionData.message,
+          description: data.error || "Failed to generate image.",
         });
+        setIsLoading(false);
         return;
       }
-      let pollingTimeout: NodeJS.Timeout;
-
-      predictionsRef.current = [
-        ...predictionsRef.current,
-        predictionData.interiorImageId,
-      ];
+      // Add new image to predictions (for UI update)
+      predictionsRef.current = [...predictionsRef.current, data.id];
       setPredictions(predictionsRef.current);
       updateLoadingState({ ...user, plan: userPlan });
       form.reset({
@@ -288,15 +310,13 @@ export const useInteriorDesignForm = (user: PlainUser) => {
         beforeImage: form.getValues("beforeImage"),
         prompt: form.getValues("prompt"),
       });
-      pollingTimeout = setTimeout(() => {
-        polling();
-      }, 35000);
       router.refresh();
-      return () => {
-        if (pollingTimeout) {
-          clearTimeout(pollingTimeout);
-        }
-      };
+      toast({
+        title: "Image generated!",
+        description: "Your AI interior image is ready.",
+      });
+      setIsLoading(false);
+      return;
     } catch (error: any) {
       toast({
         variant: "destructive",
