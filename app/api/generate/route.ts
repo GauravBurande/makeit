@@ -38,12 +38,20 @@ export async function POST(req: Request) {
     const user = await getServerSession(authOptions);
     if (!user) {
       return NextResponse.json(
-        { error: "You must be logged in!" },
+        { code: "unauthorized", message: "You must be logged in!" },
         { status: 401 }
       );
     }
     await connectMongo();
-    const formData = await req.formData();
+    let formData: FormData;
+    try {
+      formData = await req.formData();
+    } catch {
+      return NextResponse.json(
+        { code: "invalid_request", message: "Invalid or missing form data." },
+        { status: 400 }
+      );
+    }
     const prompt = formData.get("prompt") as string;
     const style = formData.get("style") as string;
     const roomType = formData.get("roomType") as string;
@@ -52,30 +60,107 @@ export async function POST(req: Request) {
     const userId = formData.get("userId") as string;
     const file = formData.get("image") as File | null;
     const imageUrl = formData.get("imageUrl") as string | null;
+    // Validate required fields
+    if (!userId) {
+      return NextResponse.json(
+        { code: "missing_user_id", message: "User ID is required." },
+        { status: 400 }
+      );
+    }
+    if (!file && !imageUrl) {
+      return NextResponse.json(
+        {
+          code: "no_image_provided",
+          message:
+            "No image provided. Please upload a file or provide an image URL.",
+        },
+        { status: 400 }
+      );
+    }
     let buffer: Buffer | null = null;
     let mimeType: string = "image/png";
     let fileName: string = "upload.png";
     if (file) {
-      const arrayBuffer = await file.arrayBuffer();
-      buffer = Buffer.from(arrayBuffer);
+      // Only allow certain file types
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+      if (!allowedTypes.includes(file.type)) {
+        return NextResponse.json(
+          {
+            code: "unsupported_file_type",
+            message: `Unsupported file type: ${file.type}`,
+          },
+          { status: 415 }
+        );
+      }
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        buffer = Buffer.from(arrayBuffer);
+      } catch {
+        return NextResponse.json(
+          { code: "file_read_error", message: "Failed to read uploaded file." },
+          { status: 400 }
+        );
+      }
       mimeType = file.type || getMimeType(file.name);
       fileName = file.name;
     } else if (imageUrl) {
       // Fetch the image from the URL
-      const imgRes = await fetch(imageUrl);
-      if (!imgRes.ok) {
+      let imgRes: Response;
+      try {
+        imgRes = await fetch(imageUrl);
+      } catch {
         return NextResponse.json(
-          { error: "Failed to fetch image from URL" },
+          {
+            code: "image_fetch_failed",
+            message: "Failed to fetch image from URL.",
+          },
           { status: 400 }
         );
       }
-      const arrayBuffer = await imgRes.arrayBuffer();
-      buffer = Buffer.from(arrayBuffer);
+      if (!imgRes.ok) {
+        return NextResponse.json(
+          {
+            code: "image_fetch_failed",
+            message: `Failed to fetch image from URL. Status: ${imgRes.status}`,
+          },
+          { status: 400 }
+        );
+      }
+      try {
+        const arrayBuffer = await imgRes.arrayBuffer();
+        buffer = Buffer.from(arrayBuffer);
+      } catch {
+        return NextResponse.json(
+          {
+            code: "image_buffer_error",
+            message: "Failed to process image from URL.",
+          },
+          { status: 400 }
+        );
+      }
       // Try to get mime type from headers or fallback
       mimeType = imgRes.headers.get("content-type") || getMimeType(imageUrl);
       fileName = imageUrl.split("/").pop() || "upload.png";
-    } else {
-      return NextResponse.json({ error: "No image provided" }, { status: 400 });
+      // Only allow certain mime types
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+      if (!allowedTypes.includes(mimeType)) {
+        return NextResponse.json(
+          {
+            code: "unsupported_file_type",
+            message: `Unsupported image type from URL: ${mimeType}`,
+          },
+          { status: 415 }
+        );
+      }
+    }
+    if (!buffer) {
+      return NextResponse.json(
+        {
+          code: "image_buffer_error",
+          message: "Failed to process image data.",
+        },
+        { status: 400 }
+      );
     }
     const imageBase64 = fileToBase64(buffer);
     const model = genAI.getGenerativeModel({
@@ -91,7 +176,19 @@ export async function POST(req: Request) {
     if (material) interiorPrompt += `. Highlight ${material} as a key material`;
     if (prompt) interiorPrompt += `. ${prompt}`;
     // Generate image
-    const result = await model.generateContent([interiorPrompt, imagePart]);
+    let result: any;
+    try {
+      result = await model.generateContent([interiorPrompt, imagePart]);
+    } catch (err) {
+      // Let the catch block below handle Gemini API errors
+      throw err;
+    }
+    if (!result || !result.response) {
+      return NextResponse.json(
+        { code: "model_error", message: "No response from AI model." },
+        { status: 502 }
+      );
+    }
     const response = result.response;
     const candidates = response.candidates;
     let generatedImageBuffer: Buffer | null = null;
@@ -105,63 +202,125 @@ export async function POST(req: Request) {
         }
       }
     }
-
     if (!generatedImageBuffer) {
       return NextResponse.json(
-        { error: "No image generated" },
-        { status: 500 }
+        {
+          code: "no_image_generated",
+          message: "AI model did not return a generated image.",
+        },
+        { status: 502 }
       );
     }
     // Upload to R2
     const filename = `${Date.now()}-${userId}.png`;
-    const fileToUpload = new File(
-      [new Uint8Array(generatedImageBuffer)],
-      filename,
-      {
-        type: "image/png",
-      }
-    );
-    const uploadedUrl = await uploadImageFileAndReturnUrl(
-      fileToUpload,
-      filename
-    );
+    let fileToUpload: File;
+    try {
+      fileToUpload = new File(
+        [new Uint8Array(generatedImageBuffer)],
+        filename,
+        {
+          type: "image/png",
+        }
+      );
+    } catch {
+      return NextResponse.json(
+        {
+          code: "file_creation_error",
+          message: "Failed to create file for upload.",
+        },
+        { status: 500 }
+      );
+    }
+    let uploadedUrl: string;
+    try {
+      uploadedUrl = await uploadImageFileAndReturnUrl(fileToUpload, filename);
+    } catch {
+      return NextResponse.json(
+        { code: "upload_failed", message: "Failed to upload generated image." },
+        { status: 500 }
+      );
+    }
     // Save to DB
-    const interiorImage = await InteriorImage.create([
-      {
-        userId,
-        prompt,
-        beforeImage: file ? file.name : imageUrl || "",
-        afterImage: uploadedUrl,
-        negativePrompt: "",
-        style,
-        roomType,
-        color,
-        material,
-        status: "completed",
-      },
-    ]);
+    let interiorImage: any;
+    try {
+      interiorImage = await InteriorImage.create([
+        {
+          userId,
+          prompt,
+          beforeImage: file ? file.name : imageUrl || "",
+          afterImage: uploadedUrl,
+          negativePrompt: "",
+          style,
+          roomType,
+          color,
+          material,
+          status: "completed",
+        },
+      ]);
+    } catch {
+      return NextResponse.json(
+        {
+          code: "db_error",
+          message: "Failed to save generated image to database.",
+        },
+        { status: 500 }
+      );
+    }
     // Update user
-    await User.findOneAndUpdate(
-      { _id: userId },
-      {
-        $push: {
-          interiorImages: {
-            imageId: interiorImage[0]._id,
-            imageUrl: uploadedUrl,
+    try {
+      await User.findOneAndUpdate(
+        { _id: userId },
+        {
+          $push: {
+            interiorImages: {
+              imageId: interiorImage[0]._id,
+              imageUrl: uploadedUrl,
+            },
           },
         },
-      },
-      { new: true }
-    );
+        { new: true }
+      );
+    } catch {
+      // Not critical, but log and continue
+      console.warn("Failed to update user with new image.");
+    }
     return NextResponse.json(
       { imageUrl: uploadedUrl, id: interiorImage[0]._id },
       { status: 201 }
     );
   } catch (error) {
     console.error("Error in Gemini POST handler:", error);
+    // Default error response
+    let status = 500;
+    let code = "internal_error";
+    let message = "An unexpected error occurred. Please try again later.";
+    let details: any = undefined;
+
+    // Handle Gemini API quota/rate limit errors
+    if (typeof error === "object" && error && "message" in error) {
+      const errMsg = (error as any).message as string;
+      if (
+        errMsg.includes("429 Too Many Requests") ||
+        errMsg.includes("quota")
+      ) {
+        status = 429;
+        code = "quota_exceeded";
+        message =
+          "You have exceeded your usage quota for AI image generation. Please try again later or check your plan/billing.";
+        // Try to extract retry time if present
+        const retryMatch = errMsg.match(/Please retry in ([0-9.]+)s/);
+        if (retryMatch) {
+          details = { retryAfterSeconds: parseFloat(retryMatch[1]) };
+        }
+      } else {
+        // Other known Gemini errors
+        message = errMsg;
+      }
+    }
+
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      details ? { code, message, details } : { code, message },
+      { status }
     );
   }
 }

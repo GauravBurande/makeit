@@ -339,13 +339,13 @@ export const useInteriorDesignForm = (user: PlainUser) => {
       return;
     }
 
-    // Free tier: limit uploads to 10 images if user has no plan
-    if (!user.plan && user.usedImages >= 10) {
+    // Free tier: limit uploads to 5 images if user has no plan
+    if (!user.plan && user.usedImages >= 5) {
       toast({
         variant: "destructive",
         title: "Image Upload Limit Reached",
         description:
-          "Free users can upload up to 10 images. Please upgrade to upload more.",
+          "Free users can upload up to 5 images. Please upgrade to upload more.",
       });
       return;
     }
