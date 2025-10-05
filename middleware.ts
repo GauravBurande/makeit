@@ -23,5 +23,11 @@ export default async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/api/auth/signin/email"],
+  // just fucking rate limit anything you feel like rn!
+  matcher: [
+    "/api/auth/signin/email",
+    "/api/image-upload",
+    "/api/generate",
+    "/api/prediction",
+  ],
 };

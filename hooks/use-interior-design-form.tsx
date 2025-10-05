@@ -220,11 +220,21 @@ export const useInteriorDesignForm = (user: PlainUser) => {
       return;
     }
 
-    if (user.usedImages >= user.imageLimit) {
-      errorToast(
-        "It seems like you have reached your image limit. Please upgrade your account to add more images."
-      );
-      return;
+    // Free tier: allow up to 5 images if user has no plan (plan is undefined/null)
+    if (!user.plan) {
+      if (user.usedImages >= 5) {
+        errorToast(
+          "You have reached your free image limit (5). Please upgrade your account to add more images."
+        );
+        return;
+      }
+    } else {
+      if (user.usedImages >= user.imageLimit) {
+        errorToast(
+          "It seems like you have reached your image limit. Please upgrade your account to add more images."
+        );
+        return;
+      }
     }
 
     if (user.storageLimit <= user.storageUsed) {
@@ -335,6 +345,17 @@ export const useInteriorDesignForm = (user: PlainUser) => {
         variant: "destructive",
         title: "Image File is too large",
         description: "Maximum image file size is 5MB.",
+      });
+      return;
+    }
+
+    // Free tier: limit uploads to 10 images if user has no plan
+    if (!user.plan && user.usedImages >= 10) {
+      toast({
+        variant: "destructive",
+        title: "Image Upload Limit Reached",
+        description:
+          "Free users can upload up to 10 images. Please upgrade to upload more.",
       });
       return;
     }

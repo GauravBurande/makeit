@@ -1,5 +1,5 @@
 const configs = {
-  domain: "makeit.ai",
+  domain: "makeit.guaravvan.com",
   appName: "makeIt",
   description:
     "Reimagine your space and rooms with AI-powered interior design. Get instant, personalized room ideas tailored to your style and needs. Explore countless design possibilities effortlessly, whether you're a homeowner or design pro. Transform your home with a click.",
@@ -13,8 +13,7 @@ const configs = {
   },
   r2: {
     bucket: "makeit",
-    bucketUrl: null,
-    // bucketUrl: `https://cdn.makeit.ai`,
+    bucketUrl: "https://makeit-cdn.guaravvan.com",
     cdn: "https://cdn-id.cloudfront.net",
   },
   mailgun: {
