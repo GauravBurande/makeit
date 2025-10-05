@@ -204,11 +204,6 @@ export const useInteriorDesignForm = (user: PlainUser) => {
       });
     };
 
-    if (!user.hasAccess) {
-      errorToast("It seems like you haven't purchased yet!");
-      return;
-    }
-
     const userPlan = user.plan || "Personal";
     const predictionLimit =
       PredictionLimits[userPlan] || PredictionLimits.Personal;
@@ -229,6 +224,10 @@ export const useInteriorDesignForm = (user: PlainUser) => {
         return;
       }
     } else {
+      if (!user.hasAccess) {
+        errorToast("It seems like you haven't purchased yet!");
+        return;
+      }
       if (user.usedImages >= user.imageLimit) {
         errorToast(
           "It seems like you have reached your image limit. Please upgrade your account to add more images."
@@ -257,7 +256,6 @@ export const useInteriorDesignForm = (user: PlainUser) => {
     } = data;
 
     try {
-      // Use Gemini endpoint with FormData
       const formData = new FormData();
       formData.append("userId", user._id);
       formData.append("prompt", prompt);
@@ -265,9 +263,6 @@ export const useInteriorDesignForm = (user: PlainUser) => {
       formData.append("roomType", roomType || "");
       formData.append("color", color || "");
       formData.append("material", material || "");
-      // beforeImage is a URL or data string, but Gemini expects a File
-      // If beforeImage is a data URL, convert to File
-      let imageFile: File | null = null;
       if (beforeImage.startsWith("data:image")) {
         // Convert dataURL to File
         const arr = beforeImage.split(",");
@@ -279,15 +274,11 @@ export const useInteriorDesignForm = (user: PlainUser) => {
         while (n--) {
           u8arr[n] = bstr.charCodeAt(n);
         }
-        imageFile = new File([u8arr], "upload.png", { type: mime });
-      } else if (beforeImage.startsWith("http")) {
-        // Fetch the image and convert to File
-        const res = await fetch(beforeImage);
-        const blob = await res.blob();
-        imageFile = new File([blob], "upload.png", { type: blob.type });
-      }
-      if (imageFile) {
+        const imageFile = new File([u8arr], "upload.png", { type: mime });
         formData.append("image", imageFile);
+      } else if (beforeImage.startsWith("http")) {
+        // Send the image URL to the backend, let backend fetch it
+        formData.append("imageUrl", beforeImage);
       } else {
         toast({
           variant: "destructive",
@@ -301,18 +292,17 @@ export const useInteriorDesignForm = (user: PlainUser) => {
         method: "POST",
         body: formData,
       });
-      const data = await response.json();
+      const respData = await response.json();
       if (!response.ok) {
         toast({
           variant: "destructive",
           title: response.statusText,
-          description: data.error || "Failed to generate image.",
+          description: respData.error || "Failed to generate image.",
         });
         setIsLoading(false);
         return;
       }
-      // Add new image to predictions (for UI update)
-      predictionsRef.current = [...predictionsRef.current, data.id];
+      predictionsRef.current = [...predictionsRef.current, respData.id];
       setPredictions(predictionsRef.current);
       updateLoadingState({ ...user, plan: userPlan });
       form.reset({

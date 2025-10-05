@@ -3,6 +3,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Upload } from "@aws-sdk/lib-storage";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { env } from "@/env";
+import configs from "@/config";
 
 const accessKeyId = env.CLOUDFLARE_ACCESS_KEY_ID;
 const secretAccessKey = env.CLOUDFLARE_SECRET_ACCESS_KEY;
@@ -85,7 +86,7 @@ export async function uploadImageFileAndReturnUrl(
     await parallelUploads.done();
 
     // return `https://${env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com/${Bucket}/${Key}`;
-    return `https://cdn.makeit.ai/${Key}`;
+    return `${configs.r2.bucketUrl}/${Key}`;
   } catch (e) {
     throw e;
   }

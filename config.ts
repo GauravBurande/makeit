@@ -13,7 +13,7 @@ const configs = {
   },
   r2: {
     bucket: "makeit",
-    bucketUrl: "https://makeit-cdn.guaravvan.com",
+    bucketUrl: "https://makeit-cdn.gauravvan.com",
     cdn: "https://cdn-id.cloudfront.net",
   },
   mailgun: {

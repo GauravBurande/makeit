@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Buffer } from "buffer";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { uploadImageFileAndReturnUrl } from "@/lib/r2";
 import InteriorImage from "@/models/InteriorImage";
@@ -49,14 +50,34 @@ export async function POST(req: Request) {
     const color = formData.get("color") as string;
     const material = formData.get("material") as string;
     const userId = formData.get("userId") as string;
-    const file = formData.get("image") as File;
-    if (!file) {
+    const file = formData.get("image") as File | null;
+    const imageUrl = formData.get("imageUrl") as string | null;
+    let buffer: Buffer | null = null;
+    let mimeType: string = "image/png";
+    let fileName: string = "upload.png";
+    if (file) {
+      const arrayBuffer = await file.arrayBuffer();
+      buffer = Buffer.from(arrayBuffer);
+      mimeType = file.type || getMimeType(file.name);
+      fileName = file.name;
+    } else if (imageUrl) {
+      // Fetch the image from the URL
+      const imgRes = await fetch(imageUrl);
+      if (!imgRes.ok) {
+        return NextResponse.json(
+          { error: "Failed to fetch image from URL" },
+          { status: 400 }
+        );
+      }
+      const arrayBuffer = await imgRes.arrayBuffer();
+      buffer = Buffer.from(arrayBuffer);
+      // Try to get mime type from headers or fallback
+      mimeType = imgRes.headers.get("content-type") || getMimeType(imageUrl);
+      fileName = imageUrl.split("/").pop() || "upload.png";
+    } else {
       return NextResponse.json({ error: "No image provided" }, { status: 400 });
     }
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
     const imageBase64 = fileToBase64(buffer);
-    const mimeType = file.type || getMimeType(file.name);
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash-image-preview",
     });
@@ -109,7 +130,7 @@ export async function POST(req: Request) {
       {
         userId,
         prompt,
-        beforeImage: file.name,
+        beforeImage: file ? file.name : imageUrl || "",
         afterImage: uploadedUrl,
         negativePrompt: "",
         style,
