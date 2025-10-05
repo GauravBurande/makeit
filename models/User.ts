@@ -12,6 +12,7 @@ export interface IUser extends Document {
   plan?: string;
   imageLimit: number;
   usedImages: number;
+  uploadedImage?: number; // Number of images uploaded by free user
   storageLimit: number; // in KBs
   storageUsed: number; // in KBs
   subscription?: mongoose.Schema.Types.ObjectId;
@@ -62,6 +63,10 @@ const userSchema = new Schema<IUser>(
     },
     usedImages: {
       type: Number,
+    },
+    uploadedImage: {
+      type: Number,
+      default: 0,
     },
     storageLimit: {
       type: Number, // in KBs

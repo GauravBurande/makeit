@@ -81,9 +81,14 @@ export async function POST(req: NextRequest) {
         /\.[^/.]+$/,
         ""
       )}.${outputFormat}`;
-      const compressedFile = new File([compressedImage], fileName, {
-        type: `image/${outputFormat}`,
-      });
+      // Convert Buffer to Uint8Array for File constructor compatibility
+      const compressedFile = new File(
+        [new Uint8Array(compressedImage)],
+        fileName,
+        {
+          type: `image/${outputFormat}`,
+        }
+      );
 
       // Upload the compressed file
       const fileUrl = await uploadImageFileAndReturnUrl(
@@ -91,14 +96,21 @@ export async function POST(req: NextRequest) {
         fileName
       );
 
-      const user = await User.findByIdAndUpdate(
-        userId,
-        { $inc: { storageUsed: compressedSizeInKB } },
-        { new: true }
-      );
-
+      // Fetch user to check plan
+      let user = await User.findById(userId);
       if (!user) {
         return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
+
+      // If free user (no plan), increment uploadedImage
+      if (!user.plan) {
+        user.uploadedImage = (user.uploadedImage || 0) + 1;
+        user.storageUsed += compressedSizeInKB;
+        await user.save();
+      } else {
+        // Paid user: only increment storageUsed
+        user.storageUsed += compressedSizeInKB;
+        await user.save();
       }
 
       const addedBeforeImage = await BeforeImage.create({

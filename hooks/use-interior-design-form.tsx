@@ -339,8 +339,8 @@ export const useInteriorDesignForm = (user: PlainUser) => {
       return;
     }
 
-    // Free tier: limit uploads to 5 images if user has no plan
-    if (!user.plan && user.usedImages >= 5) {
+    // Free tier: limit uploads to 5 images if user has no plan, using uploadedImage field
+    if (!user.plan && (user.uploadedImage ?? 0) >= 5) {
       toast({
         variant: "destructive",
         title: "Image Upload Limit Reached",
@@ -378,6 +378,11 @@ export const useInteriorDesignForm = (user: PlainUser) => {
 
       setPreview(fileUrl);
       form.setValue("beforeImage", fileUrl);
+
+      // Increment uploadedImage for free users (no plan), fallback for the db field being undefined
+      if (!user.plan && user.uploadedImage !== undefined) {
+        user.uploadedImage = (user.uploadedImage || 0) + 1;
+      }
 
       toast({
         title: "Done!",
