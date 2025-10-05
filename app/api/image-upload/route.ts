@@ -102,16 +102,10 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "User not found" }, { status: 404 });
       }
 
-      // If free user (no plan), increment uploadedImage
-      if (!user.plan) {
-        user.uploadedImage = (user.uploadedImage || 0) + 1;
-        user.storageUsed += compressedSizeInKB;
-        await user.save();
-      } else {
-        // Paid user: only increment storageUsed
-        user.storageUsed += compressedSizeInKB;
-        await user.save();
-      }
+      // Increment uploadedImage for all users
+      user.uploadedImage = (user.uploadedImage || 0) + 1;
+      user.storageUsed += compressedSizeInKB;
+      await user.save();
 
       const addedBeforeImage = await BeforeImage.create({
         userId,
