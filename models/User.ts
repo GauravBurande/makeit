@@ -57,7 +57,6 @@ const userSchema = new Schema<IUser>(
       type: String,
       enum: ["Free", "Personal", "Pro", "Premium"],
       required: false,
-      default: null,
     },
     imageLimit: {
       type: Number,

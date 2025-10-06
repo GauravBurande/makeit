@@ -104,7 +104,15 @@ export async function POST(req: NextRequest) {
 
       // Increment uploadedImage for all users
       user.uploadedImage = (user.uploadedImage || 0) + 1;
+      // Ensure storageUsed is a number and not NaN
+      if (typeof user.storageUsed !== "number" || isNaN(user.storageUsed)) {
+        user.storageUsed = 0;
+      }
       user.storageUsed += compressedSizeInKB;
+      // Only set plan if it is a valid value
+      if (user.plan === null || user.plan === undefined) {
+        user.plan = undefined;
+      }
       await user.save();
 
       const addedBeforeImage = await BeforeImage.create({
